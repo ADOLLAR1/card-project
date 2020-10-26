@@ -1,8 +1,10 @@
-const { Socket } = require('dgram');
 const WebSocket = require('ws');
 const server = new WebSocket.Server({
     port: 15000
 });
+
+const password = "LetUsPlay";
+const hostpassword = "GimmieHost"
 
 /*
     JSON Messages
@@ -70,10 +72,10 @@ server.on('connection', function(socket) {
 
         if (object.type === "LOGIN") { //Login
             authData[socket] = {};
-            if (object.return.password === "LetUsPlay") {
+            if (object.return.password === password) {
                 authData[socket].Auth = true;
             }
-            if (object.return.hostpassword === "GimmieHost") {
+            if (object.return.hostpassword === hostpassword) {
                 authData[socket].Host = true;
             }
             if (authData[socket].Auth) {
