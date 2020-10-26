@@ -32,7 +32,7 @@ const AuthFailedJSON = {
         {
             name: "AuthError",
             type: "MESSAGE",
-            info: "Incorrect password! Please reload and try again!"
+            info: "Incorrect password! Please try again!"
         },
         {
             name: "password",
