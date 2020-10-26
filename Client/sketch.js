@@ -1,6 +1,8 @@
 const WSURL = "ws://localhost:15000";
 let socket;
 
+let playerData = {};
+
 function preload() {}
 
 function setup() {
@@ -58,6 +60,9 @@ function socketMessage(event) {
         if (command.type === "PROMPT") {
             data.return[command.name] = infoPrompt(command.info);
         }
+        if (command.type === "SET") {
+            data.return[command.name] = set(command.name, command.value);
+        }
     });
     data.type = type;
     if (type != null) socket.send(JSON.stringify(data));;
@@ -69,5 +74,12 @@ function infoMessage(info) {
 }
 
 function infoPrompt(info) {
-    return prompt(info);
+    let value = prompt(info);
+    while (value == null) value = prompt(info);
+    return value
+}
+
+function set(key, value) {
+    playerData[key] = value;
+    return value;
 }
