@@ -60,7 +60,7 @@ function socketMessage(event) {
         }
     });
     data.type = type;
-    socket.send(JSON.stringify(data));
+    if (type != null) socket.send(JSON.stringify(data));;
 }
 
 function infoMessage(info) {
