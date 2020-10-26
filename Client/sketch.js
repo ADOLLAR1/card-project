@@ -50,3 +50,12 @@ function socketError(event) {
 function socketMessage(event) {
 
 }
+
+function message(info) {
+    alert(info);
+    return null;
+}
+
+function prompt(info) {
+    return prompt(info);
+}
