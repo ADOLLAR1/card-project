@@ -33,10 +33,10 @@ function createWSConnection() {
 }
 
 function socketOpen(event) {
-    let data = {
+    /*let data = {
         type: "OPEN"
     }
-    socket.send(JSON.stringify(data));
+    socket.send(JSON.stringify(data));*/
 }
 
 function socketClose(event) {
