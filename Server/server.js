@@ -32,7 +32,7 @@ const AuthFailedJSON = {
         {
             name: "AuthError",
             type: "MESSAGE",
-            info: "Incorrect password. Please reload and try again."
+            info: "Incorrect password! Please reload and try again!"
         }
     ]
 }
@@ -40,6 +40,22 @@ const AuthFailedJSON = {
 const NameJSON = {
     return_type: "NAME",
     run: [
+        {
+            name: "name",
+            type: "PROMPT",
+            info: "Enter your name"
+        }
+    ]
+}
+
+const NameTakenJSON = {
+    return_type: "NAME",
+    run: [
+        {
+            name: "NameError",
+            type: "MESSAGE",
+            info: "Name Already Taken! Please Try again!"
+        },
         {
             name: "name",
             type: "PROMPT",
@@ -87,7 +103,15 @@ server.on('connection', function(socket) {
 
         if (object.type === "NAME") { //Set Name
             if (authData[socket].Auth) {
-                playerData[socket] = createPlayerData(object.return.name, authData[socket].Host);
+                let found = false;
+                sockets.forEach(s => {
+                    if (playerData[s].name === object.return.name) {found = true;}
+                });
+                if (found) {
+                    socket.send(JSON.stringify(NameTakenJSON));
+                } else {
+                    playerData[socket] = createPlayerData(object.return.name, authData[socket].Host);
+                }
             }
         }
     });
