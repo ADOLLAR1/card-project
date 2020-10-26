@@ -48,14 +48,26 @@ function socketError(event) {
 }
 
 function socketMessage(event) {
-
+    let object = JSON.parse(event.data);
+    let type = object.return_type;
+    let data = {return: {}};
+    object.run.forEach(command => {
+        if (command.type === "MESSAGE") {
+            data.return[command.name] = infoMessage(command.info);
+        }
+        if (command.type === "PROMPT") {
+            data.return[command.name] = infoPrompt(command.info);
+        }
+    });
+    data.type = type;
+    socket.send(JSON.stringify(data));
 }
 
-function message(info) {
+function infoMessage(info) {
     alert(info);
     return null;
 }
 
-function prompt(info) {
+function infoPrompt(info) {
     return prompt(info);
 }

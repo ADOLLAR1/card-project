@@ -21,18 +21,28 @@ const LoginJSON = {
         {
             name: "hostpassword",
             type: "PROMPT",
-            info: "Host Password (Press Skip)"
+            info: "Host Password (Press OK)"
         }
     ]
 }
 
 const AuthFailedJSON = {
-    return_type: null,
+    return_type: "LOGIN",
     run: [
         {
             name: "AuthError",
             type: "MESSAGE",
             info: "Incorrect password! Please reload and try again!"
+        },
+        {
+            name: "password",
+            type: "PROMPT",
+            info: "Password"
+        },
+        {
+            name: "hostpassword",
+            type: "PROMPT",
+            info: "Host Password (Press OK)"
         }
     ]
 }
@@ -78,6 +88,7 @@ let authData = {};
 
 server.on('connection', function(socket) {
     sockets.push(socket);
+    console.log("Connection recived!");
     
     
     socket.send(JSON.stringify(LoginJSON));
@@ -87,6 +98,7 @@ server.on('connection', function(socket) {
         let object = JSON.parse(msg) //create Object
 
         if (object.type === "LOGIN") { //Login
+            console.log("Recived Login message!");
             authData[socket] = {};
             if (object.return.password === password) {
                 authData[socket].Auth = true;
@@ -102,10 +114,13 @@ server.on('connection', function(socket) {
         }
 
         if (object.type === "NAME") { //Set Name
+            console.log("Recived Name Message!")
             if (authData[socket].Auth) {
                 let found = false;
                 sockets.forEach(s => {
-                    if (playerData[s].name === object.return.name) {found = true;}
+                    if (playerData[s] != null) {
+                        if (playerData[s].name === object.return.name) {found = true;}
+                    }
                 });
                 if (found) {
                     socket.send(JSON.stringify(NameTakenJSON));
