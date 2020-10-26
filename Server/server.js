@@ -126,6 +126,21 @@ server.on('connection', function(socket) {
                     socket.send(JSON.stringify(NameTakenJSON));
                 } else {
                     playerData[socket] = createPlayerData(object.return.name, authData[socket].Host);
+                    socket.send(JSON.stringify({
+                        return_type: null,
+                        run: [
+                            {
+                                name: "Host",
+                                type: "SET",
+                                value: authData[socket].Host
+                            },
+                            {
+                                name: "Name",
+                                type: "SET",
+                                value: playerData[socket].name
+                            }
+                        ]
+                    }));
                 }
             }
         }
