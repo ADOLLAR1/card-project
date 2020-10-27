@@ -32,7 +32,7 @@ function draw() {
 }
 
 function drawCard(cardText, pos, size, tooltip) {
-    if (cardText != null && cardText != undefined) {
+    if (cardText != null && cardText != undefined && cardText != "") {
         textAlign(CENTER, CENTER);
         fill(255);
         stroke(0);
