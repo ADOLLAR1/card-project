@@ -196,8 +196,6 @@ server.on('connection', function(socket) {
         }
 
         if (object.type === "START") {
-            console.log(sockets.length);
-            console.log (authData[socket].Host);
             console.log("Recived Start Message!");
             if (authData[socket].Host) {
                 if (sockets.length >= 2) {
@@ -207,9 +205,7 @@ server.on('connection', function(socket) {
                         shuffle(draw_pile);
                         if (sockets.length <= 4) {
                             sockets.forEach(s => {
-                                for (let i = 0; i < 30; i++) {
-                                    pushCard(playerData[s].stock_pile, popCard(draw_pile));
-                                }
+                                playerData[s].stock_pile = popMultCard(draw_pile, 30);
                                 s.send(JSON.stringify({
                                     return_type: null,
                                     run: [
@@ -223,10 +219,7 @@ server.on('connection', function(socket) {
                             });
                         } else {
                             sockets.forEach(s => {
-                                let temp_pile = []
-                                for (let i = 0; i < 20; i++) {
-                                    pushCard(playerData[s].stock_pile, popCard(draw_pile));
-                                }
+                                playerData[s].stock_pile = popMultCard(draw_pile, 20);
                                 s.send(JSON.stringify({
                                     return_type: null,
                                     run: [
@@ -240,9 +233,7 @@ server.on('connection', function(socket) {
                             });
                         }
                         sockets.forEach(s => {
-                            for (let i = 0; i < 5; i++) {
-                                pushCard(playerData[s].hand, popCard(draw_pile));
-                            }
+                            playerData[s].hand = popMultCard(draw_pile, 5);
                             s.send(JSON.stringify({
                                 return_type: null,
                                 run: [
@@ -346,4 +337,13 @@ function getTopCard(deck) {
         return card;
     }
     return null;
+}
+
+function popMultCard(deck, amount) {
+    if (deck.length >= amount) {
+        let card = deck.splice(deck.length-amount-1, amount);
+        return card;
+    } else {
+        return null;
+    }
 }
