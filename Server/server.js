@@ -20,6 +20,8 @@ const cards = [ "1","1","1","1","1","1","1","1","1","1","1","1",
 
 let draw_pile = [], build_pile_1 = [], build_pile_2 = [], build_pile_3 = [], build_pile_4 = [];
 
+let turn_index = 0;
+
 const password = "LetUsPlay";
 const hostpassword = "GimmieHost"
 
@@ -124,6 +126,17 @@ const TooManyPlayersJSON = {
     ]
 }
 
+const NotYourTurnJSON = {
+    return_type: null,
+    run: [
+        {
+            name: "NotYourTurnError",
+            type: "MESSAGE",
+            info: "You cannot do this as it is not your turn!"
+        }
+    ]
+}
+
 /*
     Data Holding
 */
@@ -200,7 +213,7 @@ server.on('connection', function(socket) {
             if (authData[socket].Host) {
                 if (sockets.length >= 2) {
                     if (sockets.length <= 6) {
-                        build_pile_1 = [], build_pile_2 = [], build_pile_3 = [], build_pile_4 = [];
+                        build_pile_1 = [], build_pile_2 = [], build_pile_3 = [], build_pile_4 = [], turn_index = 0;
                         draw_pile = [...cards];
                         shuffle(draw_pile);
                         if (sockets.length <= 4) {
@@ -275,6 +288,115 @@ server.on('connection', function(socket) {
                 socket.send(JSON.stringify(NotHostJSON));
             }
         }
+        
+        if (object.type === "PLACE") {
+            console.log("REcived Place Message!");
+            if (socket == sockets[turn_index]) {
+                let pop = object.return.pop;
+                let push = object.return.push;
+                if (!((push === "Discard1Card" || push === "Discard2Card" || push === "Discard3Card" || push === "Discard4Card") && (pop === "Discard1Card" || pop === "Discard2Card" || pop === "Discard3Card" || pop === "Discard4Card"))) {
+                    if (!((push === "Discard1Card" || push === "Discard2Card" || push === "Discard3Card" || push === "Discard4Card") && pop === "StockCard")) {
+                        if (push === "Discard1Card" || push === "Discard2Card" || push === "Discard3Card" || push === "Discard4Card") {
+                            pushCard(translateDeckName(push, socket), popHandCard(pop, socket));
+                            turn_index++;
+                            if (turn_index == sockets.length) turn_index = 0;
+                        } else if (pop === "StockCard") {
+                            if (CheckCardPlacement(translateDeckName(push, socket), getTopCard(translateDeckName(pop, socket)))) {
+                                pushCard(translateDeckName(push, socket), getTopCard(translateDeckName(pop, socket)));
+                            }
+                        } else if (pop === "Hand1" || pop === "Hand2" || pop === "Hand3" || pop === "Hand4" || pop === "Hand5") {
+                            if (CheckCardPlacement(translateDeckName(push, socket), translateDeckName(pop, socket))) {
+                                pushCard(translateDeckName(push, socket), popHandCard(pop, socket));
+                            }
+                        }
+                        socket.send(JSON.stringify({
+                            return_type: null,
+                            run: [
+                                {
+                                    name: "Hand1Card",
+                                    type: "SET",
+                                    value: playerData[socket].hand[0]
+                                },
+                                {
+                                    name: "Hand2Card",
+                                    type: "SET",
+                                    value: playerData[socket].hand[1]
+                                },
+                                {
+                                    name: "Hand3Card",
+                                    type: "SET",
+                                    value: playerData[socket].hand[2]
+                                },
+                                {
+                                    name: "Hand4Card",
+                                    type: "SET",
+                                    value: playerData[socket].hand[3]
+                                },
+                                {
+                                    name: "Hand5Card",
+                                    type: "SET",
+                                    value: playerData[socket].hand[4]
+                                },
+                                {
+                                    name: "Discard1Card",
+                                    type: "SET",
+                                    value: getTopCard(playerData[socket].discard_pile_1)
+                                },
+                                {
+                                    name: "Discard2Card",
+                                    type: "SET",
+                                    value: getTopCard(playerData[socket].discard_pile_2)
+                                },
+                                {
+                                    name: "Discard3Card",
+                                    type: "SET",
+                                    value: getTopCard(playerData[socket].discard_pile_3)
+                                },
+                                {
+                                    name: "Discard4Card",
+                                    type: "SET",
+                                    value: getTopCard(playerData[socket].discard_pile_4)
+                                },
+                                {
+                                    name: "StockCard",
+                                    type: "SET",
+                                    value: getTopCard(playerData[socket].stock_pile)
+                                }
+                            ]
+                        }));
+                        sockets.forEach(s => {
+                            s.send(JSON.stringify({
+                                return_type: null,
+                                run: [
+                                    {
+                                        name: "Build1Card",
+                                        type: "SET",
+                                        value: getTopCard(build_pile_1)
+                                    },
+                                    {
+                                        name: "Build2Card",
+                                        type: "SET",
+                                        value: getTopCard(build_pile_2)
+                                    },
+                                    {
+                                        name: "Build3Card",
+                                        type: "SET",
+                                        value: getTopCard(build_pile_3)
+                                    },
+                                    {
+                                        name: "Build4Card",
+                                        type: "SET",
+                                        value: getTopCard(build_pile_4)
+                                    }
+                                ]
+                            }));
+                        });
+                    }
+                }
+            } else {
+                socket.send(JSON.stringify(NotYourTurnJSON));
+            }
+        } 
     });
   
     // When a socket closes, or disconnects, remove it from the array and all other data related to it.
@@ -346,4 +468,82 @@ function popMultCard(deck, amount) {
     } else {
         return null;
     }
+}
+
+function translateDeckName(name, socket) {
+    if (name === "Discard1Card") {
+        return playerData[socket].discard_pile_1;
+    } else if (name === "Discard2Card") {
+        return playerData[socket].discard_pile_2;
+    } else if (name === "Discard3Card") {
+        return playerData[socket].discard_pile_3;
+    } else if (name === "Discard4Card") {
+        return playerData[socket].discard_pile_4;
+    } else if (name === "Build1") {
+        return build_pile_1;
+    } else if (name === "Build2") {
+        return build_pile_2;
+    } else if (name === "Build3") {
+        return build_pile_3;
+    } else if (name === "Build4") {
+        return build_pile_4;
+    } else if (name === "StockCard") {
+        return playerData[socket].stock_pile;
+    } else if (name === "Hand1") {
+        return playerData[socket].hand[0];
+    } else if (name === "Hand2") {
+        return playerData[socket].hand[1];
+    } else if (name === "Hand3") {
+        return playerData[socket].hand[2];
+    } else if (name === "Hand4") {
+        return playerData[socket].hand[3];
+    } else if (name === "Hand5") {
+        return playerData[socket].hand[4];
+    }
+}
+
+function popHandCard(name, socket) {
+    if (name === "Hand1") {
+        return popCard(playerData[sockets].hand[0]);
+    } else if (name === "Hand2") {
+        return popCard(playerData[sockets].hand[1]);
+    } else if (name === "Hand3") {
+        return popCard(playerData[sockets].hand[2]);
+    } else if (name === "Hand4") {
+        return popCard(playerData[sockets].hand[3]);
+    } else if (name === "Hand5") {
+        return popCard(playerData[sockets].hand[4]);
+    }
+}
+
+function CheckCardPlacement(deck, card) {
+    if (card === "SB") return true;
+    let top_card = getTopCard(deck);
+    switch (top_card) {
+        case null || undefined:
+            if (card === "1") return true;
+        case "1":
+            if (card === "2") return true;
+        case "2":
+            if (card === "3") return true;
+        case "3":
+            if (card === "4") return true;
+        case "4":
+            if (card === "5") return true;
+        case "5":
+            if (card === "6") return true;
+        case "6":
+            if (card === "7") return true;
+        case "7":
+            if (card === "8") return true;
+        case "8":
+            if (card === "9") return true;
+        case "9":
+            if (card === "10") return true;
+        case "10":
+            if (card === "11") return true;
+        case "11":
+            if (card === "12") return true;
+    }
+    return false;
 }

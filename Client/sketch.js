@@ -8,10 +8,12 @@ function preload() {}
 function setup() {
     createCanvas(800,800);
     createWSConnection();
+    playerData.Discard = "Cannot Discard";
 }
 
 function draw() {
     background(127);
+    textSize(18);
     drawCard(playerData.StockCard, createVector(700,600),100, "Stock Pile");
 
     drawCard(playerData.Discard1Card, createVector(200,600),100, "Discard Pile");
@@ -29,6 +31,137 @@ function draw() {
     drawCard(playerData.Hand3Card, createVector(350,300),100, "Hand");
     drawCard(playerData.Hand4Card, createVector(450,300),100, "Hand");
     drawCard(playerData.Hand5Card, createVector(550,300),100, "Hand");
+
+    drawCard(playerData.Discard, createVector(0,600), 100, "You should not see this!")
+}
+
+function mouseClicked() {
+    if (checkPoint(700,600,100)) {
+        setValue("Selected", "StockCard");
+    }
+
+    if (checkPoint(200,600,100)) {
+        if (getValue("Discard") === "Cannot Discard") {
+            setValue("Selected", "Discard1Card");
+        } else {
+            socket.send(JSON.stringify({
+                type: "PLACE",
+                return: {
+                    pop: getValue("Selected"),
+                    push: "Discard1Card"
+                }
+            }));
+        }
+    }
+    if (checkPoint(300,600,100)) {
+        if (getValue("Discard") === "Cannot Discard") {
+            setValue("Selected", "Discard2Card");
+        } else {
+            socket.send(JSON.stringify({
+                type: "PLACE",
+                return: {
+                    pop: getValue("Selected"),
+                    push: "Discard2Card"
+                }
+            }));
+        }
+    }
+    if (checkPoint(400,600,100)) {
+        if (getValue("Discard") === "Cannot Discard") {
+            setValue("Selected", "Discard3Card");
+        } else {
+            socket.send(JSON.stringify({
+                type: "PLACE",
+                return: {
+                    pop: getValue("Selected"),
+                    push: "Discard3Card"
+                }
+            }));
+        }
+    }
+    if (checkPoint(500,600,100)) {
+        if (getValue("Discard") === "Cannot Discard") {
+            setValue("Selected", "Discard4Card");
+        } else {
+            socket.send(JSON.stringify({
+                type: "PLACE",
+                return: {
+                    pop: getValue("Selected"),
+                    push: "Discard4Card"
+                }
+            }));
+        }
+    }
+
+    if (checkPoint(150,300,100)) {
+        setValue("Selected", "Hand1Card");
+    }
+    if (checkPoint(250,300,100)) {
+        setValue("Selected", "Hand2Card");
+    }
+    if (checkPoint(350,300,100)) {
+        setValue("Selected", "Hand3Card");
+    }
+    if (checkPoint(450,300,100)) {
+        setValue("Selected", "Hand4Card");
+    }
+    if (checkPoint(550,300,100)) {
+        setValue("Selected", "Hand5Card");
+    }
+
+    if (checkPoint(200,0,100)) {
+        if (getValue("Selected") != null && getValue("Selected") != undefined) {
+            socket.send(JSON.stringify({
+                type: "PLACE",
+                return: {
+                    pop: getValue("Selected"),
+                    push: "Build1"
+                }
+            }));
+        }
+    }
+    if (checkPoint(300,0,100)) {
+        if (getValue("Selected") != null && getValue("Selected") != undefined) {
+            socket.send(JSON.stringify({
+                type: "PLACE",
+                return: {
+                    pop: getValue("Selected"),
+                    push: "Build2"
+                }
+            }));
+        }
+    }
+    if (checkPoint(400,0,100)) {
+        if (getValue("Selected") != null && getValue("Selected") != undefined) {
+            socket.send(JSON.stringify({
+                type: "PLACE",
+                return: {
+                    pop: getValue("Selected"),
+                    push: "Build3"
+                }
+            }));
+        }
+    }
+    if (checkPoint(500,0,100)) {
+        if (getValue("Selected") != null && getValue("Selected") != undefined) {
+            socket.send(JSON.stringify({
+                type: "PLACE",
+                return: {
+                    pop: getValue("Selected"),
+                    push: "Build4"
+                }
+            }));
+        }
+    }
+
+    if (checkPoint(0,600,100)) {
+        if(getValue("Discard") === "Cannot Discard") {
+            setValue("Discard", "Can Discard");
+        } else {
+            setValue("Discard", "Cannot Discard");
+        }
+    }
+
 }
 
 function drawCard(cardText, pos, size, tooltip) {
@@ -36,15 +169,29 @@ function drawCard(cardText, pos, size, tooltip) {
         textAlign(CENTER, CENTER);
         fill(255);
         stroke(0);
-        rect(pos.x,pos.y,size,size*2);
-        fill(0)
+        rect(pos.x,pos.y,size,size*2, 5, 5, 5, 5);
+        if (cardText === "1" || cardText === "2" || cardText === "3" || cardText === "4") {
+            fill(0,0,255);
+        } else if (cardText === "5" || cardText === "6" || cardText === "7" || cardText === "8") {
+            fill(0,255,0);
+        } else if (cardText === "9" || cardText === "10" || cardText === "11" || cardText === "12") {
+            fill(255,127,0);
+        } else {
+            fill(255,0,0);
+        }
+        if (cardText === "Cannot Discard") {
+            fill(255,127,127);
+        } else if (cardText === "Can Discard") {
+            fill(127,255,127);
+        }
         text("* " + cardText + " *",pos.x,pos.y,size,size*2);
+        fill(0);
         stroke(0,0,0,0);
         textAlign(LEFT, TOP);
     } else {
         fill(0,0,0,0);
         stroke(0);
-        rect(pos.x, pos.y, size,size*2);
+        rect(pos.x, pos.y, size,size*2, 5, 5, 5, 5);
         fill(0);
         textAlign(CENTER, CENTER);
         text(tooltip,pos.x,pos.y,size,size*2);
@@ -106,7 +253,18 @@ function infoPrompt(info) {
 }
 
 function setValue(key, value) {
-    console.log("Setting " + key + " To " + value);
     playerData[key] = value;
     return value;
+}
+
+function getValue(key) {
+    return playerData[key];
+}
+
+function checkPoint(x1,y1,x2) {
+    let y2 = x2*2;
+    if (mouseX >= x1 && mouseY >= y1 && mouseX <= x1+x2 && mouseY <= y1+y2) {
+        return true;
+    }
+    return false;
 }
