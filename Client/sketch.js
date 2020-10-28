@@ -246,24 +246,25 @@ function socketMessage(event) {
     if (object.clientKey != null && object.clientKey != undefined && object.clientKey != key) {
         object = {};
         return;
+    } else {
+        let type = object.return_type;
+        let data = {return: {}};
+        object.run.forEach(command => {
+            if (command.type === "MESSAGE") {
+                data.return[command.name] = infoMessage(command.info);
+            }
+            if (command.type === "PROMPT") {
+                data.return[command.name] = infoPrompt(command.info);
+            }
+            if (command.type === "SET") {
+                data.return[command.name] = setValue(command.name, command.value);
+            }
+        });
+        data.type = type;
+        data.clientKey = key;
+        console.log(key);
+        if (type != null) socket.send(JSON.stringify(data));
     }
-    let type = object.return_type;
-    let data = {return: {}};
-    object.run.forEach(command => {
-        if (command.type === "MESSAGE") {
-            data.return[command.name] = infoMessage(command.info);
-        }
-        if (command.type === "PROMPT") {
-            data.return[command.name] = infoPrompt(command.info);
-        }
-        if (command.type === "SET") {
-            data.return[command.name] = setValue(command.name, command.value);
-        }
-    });
-    data.type = type;
-    data.clientKey = key;
-    console.log(key);
-    if (type != null) socket.send(JSON.stringify(data));;
 }
 
 function infoMessage(info) {
