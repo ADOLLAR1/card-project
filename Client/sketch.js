@@ -35,7 +35,7 @@ function draw() {
     drawCard(playerData.Discard, createVector(0,600), 100, "You should not see this!")
 }
 
-function mouseClicked() {
+function mouseClicked() { 
     if (checkPoint(700,600,100)) {
         setValue("Selected", "StockCard");
     }
