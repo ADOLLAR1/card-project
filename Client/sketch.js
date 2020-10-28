@@ -54,6 +54,7 @@ function mouseClicked() {
                     push: "Discard1Card"
                 }
             }));
+            setValue("Selected", undefined);
         }
     }
     if (checkPoint(300,600,100)) {
@@ -68,6 +69,7 @@ function mouseClicked() {
                     push: "Discard2Card"
                 }
             }));
+            setValue("Selected", undefined);
         }
     }
     if (checkPoint(400,600,100)) {
@@ -82,6 +84,7 @@ function mouseClicked() {
                     push: "Discard3Card"
                 }
             }));
+            setValue("Selected", undefined);
         }
     }
     if (checkPoint(500,600,100)) {
@@ -96,6 +99,7 @@ function mouseClicked() {
                     push: "Discard4Card"
                 }
             }));
+            setValue("Selected", undefined);
         }
     }
 
@@ -125,6 +129,7 @@ function mouseClicked() {
                     push: "Build1"
                 }
             }));
+            setValue("Selected", undefined);
         }
     }
     if (checkPoint(300,0,100)) {
@@ -137,6 +142,7 @@ function mouseClicked() {
                     push: "Build2"
                 }
             }));
+            setValue("Selected", undefined);
         }
     }
     if (checkPoint(400,0,100)) {
@@ -149,6 +155,7 @@ function mouseClicked() {
                     push: "Build3"
                 }
             }));
+            setValue("Selected", undefined);
         }
     }
     if (checkPoint(500,0,100)) {
@@ -161,6 +168,7 @@ function mouseClicked() {
                     push: "Build4"
                 }
             }));
+            setValue("Selected", undefined);
         }
     }
 

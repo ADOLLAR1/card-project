@@ -281,6 +281,51 @@ server.on('connection', function(socket) {
                                         name: "Hand5Card",
                                         type: "SET",
                                         value: playerData[s].hand[4]
+                                    },
+                                    {
+                                        name: "Build1Card",
+                                        type: "SET",
+                                        value: getTopCard(build_pile_1)
+                                    },
+                                    {
+                                        name: "Build2Card",
+                                        type: "SET",
+                                        value: getTopCard(build_pile_2)
+                                    },
+                                    {
+                                        name: "Build3Card",
+                                        type: "SET",
+                                        value: getTopCard(build_pile_3)
+                                    },
+                                    {
+                                        name: "Build4Card",
+                                        type: "SET",
+                                        value: getTopCard(build_pile_4)
+                                    },
+                                    {
+                                        name: "Discard1Card",
+                                        type: "SET",
+                                        value: getTopCard(playerData[s].discard_pile_1)
+                                    },
+                                    {
+                                        name: "Discard2Card",
+                                        type: "SET",
+                                        value: getTopCard(playerData[s].discard_pile_2)
+                                    },
+                                    {
+                                        name: "Discard3Card",
+                                        type: "SET",
+                                        value: getTopCard(playerData[s].discard_pile_3)
+                                    },
+                                    {
+                                        name: "Discard4Card",
+                                        type: "SET",
+                                        value: getTopCard(playerData[s].discard_pile_4)
+                                    },
+                                    {
+                                        name: "StockCard",
+                                        type: "SET",
+                                        value: getTopCard(playerData[s].stock_pile)
                                     }
                                 ]
                             }));
@@ -301,6 +346,8 @@ server.on('connection', function(socket) {
             if (object.clientKey == keys[turn_index]) {
                 let pop = object.return.pop;
                 let push = object.return.push;
+                console.log(pop);
+                console.log(push);
                 if (!((push === "Discard1Card" || push === "Discard2Card" || push === "Discard3Card" || push === "Discard4Card") && (pop === "Discard1Card" || pop === "Discard2Card" || pop === "Discard3Card" || pop === "Discard4Card"))) {
                     if (!((push === "Discard1Card" || push === "Discard2Card" || push === "Discard3Card" || push === "Discard4Card") && pop === "StockCard")) {
                         if (push === "Discard1Card" || push === "Discard2Card" || push === "Discard3Card" || push === "Discard4Card") {
@@ -346,10 +393,25 @@ server.on('connection', function(socket) {
                                 }));
                             });
                         } else if (pop === "StockCard") {
+                            if (getTopCard(translateDeckName(pop, object.clientKey)) === "SB") {
+                                console.log("DEBUG2");
+                                let old = popCard(translateDeckName(pop, object.clientKey));
+                                let top_card = getTopCard(translateDeckName(push, object.clientKey));
+                                if (top_card == null || top_card == undefined) top_card = 0;
+                                pushCard(translateDeckName(pop, object.clientKey),"~SB~".concat(parseInt(top_card) + 1));
+                            }
                             if (CheckCardPlacement(translateDeckName(push, object.clientKey), getTopCard(translateDeckName(pop, object.clientKey)))) {
-                                pushCard(translateDeckName(push, object.clientKey), getTopCard(translateDeckName(pop, object.clientKey)));
+                                pushCard(translateDeckName(push, object.clientKey), popCard(translateDeckName(pop, object.clientKey)));
                             }
                         } else if (pop === "Hand1Card" || pop === "Hand2Card" || pop === "Hand3Card" || pop === "Hand4Card" || pop === "Hand5Card") {
+                            if (translateDeckName(pop, object.clientKey) === "SB") {
+                                console.log("DEBUG1");
+                                let top_card = getTopCard(translateDeckName(push, object.clientKey));
+                                if (top_card == null || top_card == undefined) top_card = "0";
+                                let deck = translateDeckName(pop, object.clientKey);
+                                setHandCard(pop, object.clientKey, "~SB~".concat(parseInt(top_card) + 1));
+                                console.log(deck);
+                            }
                             if (CheckCardPlacement(translateDeckName(push, object.clientKey), translateDeckName(pop, object.clientKey))) {
                                 pushCard(translateDeckName(push, object.clientKey), popHandCard(pop, object.clientKey));
                             }
@@ -570,42 +632,33 @@ function popHandCard(name, socket) {
     }
 }
 
-function CheckCardPlacement(deck, card) {
-    let okay = false;
-    let top_card = getTopCard(deck);
-    if (top_card != undefined && top_card != null) top_card = top_card.replace(/~SB~/g, "");
-    switch (top_card) {
-        case null:
-            if (card === "1") okay = true;
-        case undefined:
-            if (card === "1") okay = true;
-        case "1":
-            if (card === "2") okay = true;
-        case "2":
-            if (card === "3") okay = true;
-        case "3":
-            if (card === "4") okay = true;
-        case "4":
-            if (card === "5") okay = true;
-        case "5":
-            if (card === "6") okay = true;
-        case "6":
-            if (card === "7") okay = true;
-        case "7":
-            if (card === "8") okay = true;
-        case "8":
-            if (card === "9") okay = true;
-        case "9":
-            if (card === "10") okay = true;
-        case "10":
-            if (card === "11") okay = true;
-        case "11":
-            if (card === "12") okay = true;
-        if (card === "SB") {
-            okay = true;
-            card = "~SB~" + toString(parseInt(top_card) + 1);
-        }
-
+function setHandCard(name, socket, value) {
+    if (name === "Hand1Card") {
+        playerData[socket].hand[0] = value;
+    } else if (name === "Hand2Card") {
+        playerData[socket].hand[1] = value;
+    } else if (name === "Hand3Card") {
+        playerData[socket].hand[2] = value;
+    } else if (name === "Hand4Card") {
+        playerData[socket].hand[3] = value;
+    } else if (name === "Hand5Card") {
+        playerData[socket].hand[4] = value;
     }
-    return okay;
+}
+
+function CheckCardPlacement(deck, card) {
+    let top_card = getTopCard(deck);
+    console.log(card);
+    if (top_card != undefined && top_card != null) top_card = top_card.replace(/~SB~/g, "");
+    if (card != undefined && card != null) card = card.replace(/~SB~/g, "");
+    console.log(card);
+    if (top_card == null || top_card == undefined || top_card == Number.NaN) top_card = "0";
+    top_card = parseInt(top_card);
+    card = parseInt(card);
+    console.log(card);
+    console.log(top_card);
+    if (card == top_card + 1) {
+        return true;
+    }
+    return false;
 }
