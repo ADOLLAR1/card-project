@@ -1,11 +1,13 @@
 const WSURL = "ws://localhost:15000";
 let socket;
+let key;
 
 let playerData = {};
 
 function preload() {}
 
 function setup() {
+    key = makeid(127);
     createCanvas(800,800);
     createWSConnection();
     playerData.Discard = "Cannot Discard";
@@ -46,6 +48,7 @@ function mouseClicked() {
         } else {
             socket.send(JSON.stringify({
                 type: "PLACE",
+                clientKey: key,
                 return: {
                     pop: getValue("Selected"),
                     push: "Discard1Card"
@@ -59,6 +62,7 @@ function mouseClicked() {
         } else {
             socket.send(JSON.stringify({
                 type: "PLACE",
+                clientKey: key,
                 return: {
                     pop: getValue("Selected"),
                     push: "Discard2Card"
@@ -72,6 +76,7 @@ function mouseClicked() {
         } else {
             socket.send(JSON.stringify({
                 type: "PLACE",
+                clientKey: key,
                 return: {
                     pop: getValue("Selected"),
                     push: "Discard3Card"
@@ -85,6 +90,7 @@ function mouseClicked() {
         } else {
             socket.send(JSON.stringify({
                 type: "PLACE",
+                clientKey: key,
                 return: {
                     pop: getValue("Selected"),
                     push: "Discard4Card"
@@ -113,6 +119,7 @@ function mouseClicked() {
         if (getValue("Selected") != null && getValue("Selected") != undefined) {
             socket.send(JSON.stringify({
                 type: "PLACE",
+                clientKey: key,
                 return: {
                     pop: getValue("Selected"),
                     push: "Build1"
@@ -124,6 +131,7 @@ function mouseClicked() {
         if (getValue("Selected") != null && getValue("Selected") != undefined) {
             socket.send(JSON.stringify({
                 type: "PLACE",
+                clientKey: key,
                 return: {
                     pop: getValue("Selected"),
                     push: "Build2"
@@ -135,6 +143,7 @@ function mouseClicked() {
         if (getValue("Selected") != null && getValue("Selected") != undefined) {
             socket.send(JSON.stringify({
                 type: "PLACE",
+                clientKey: key,
                 return: {
                     pop: getValue("Selected"),
                     push: "Build3"
@@ -146,6 +155,7 @@ function mouseClicked() {
         if (getValue("Selected") != null && getValue("Selected") != undefined) {
             socket.send(JSON.stringify({
                 type: "PLACE",
+                clientKey: key,
                 return: {
                     pop: getValue("Selected"),
                     push: "Build4"
@@ -166,6 +176,7 @@ function mouseClicked() {
 
 function drawCard(cardText, pos, size, tooltip) {
     if (cardText != null && cardText != undefined && cardText != "") {
+        cardText = cardText.replace(/~SB~/g, "");
         textAlign(CENTER, CENTER);
         fill(255);
         stroke(0);
@@ -224,6 +235,10 @@ function socketError(event) {
 
 function socketMessage(event) {
     let object = JSON.parse(event.data);
+    if (object.clientKey != null && object.clientKey != undefined && object.clientKey != key) {
+        object = {};
+        return;
+    }
     let type = object.return_type;
     let data = {return: {}};
     object.run.forEach(command => {
@@ -238,6 +253,8 @@ function socketMessage(event) {
         }
     });
     data.type = type;
+    data.clientKey = key;
+    console.log(key);
     if (type != null) socket.send(JSON.stringify(data));;
 }
 
@@ -268,3 +285,13 @@ function checkPoint(x1,y1,x2) {
     }
     return false;
 }
+
+function makeid(length) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+       result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+ }

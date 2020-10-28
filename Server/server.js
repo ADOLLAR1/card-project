@@ -142,6 +142,7 @@ const NotYourTurnJSON = {
 */
 
 let sockets = [];
+let keys = [];
 let playerData = {};
 let authData = {};
 
@@ -159,17 +160,19 @@ server.on('connection', function(socket) {
     // When you receive a message, do stuff
     socket.on('message', function(msg) {
         let object = JSON.parse(msg) //create Object
+        console.log(object.clientKey);
 
         if (object.type === "LOGIN") { //Login
             console.log("Recived Login message!");
-            authData[socket] = {};
+            authData[object.clientKey] = {socket: socket};
+            keys.push(object.clientKey);
             if (object.return.password === password) {
-                authData[socket].Auth = true;
+                authData[object.clientKey].Auth = true;
             }
             if (object.return.hostpassword === hostpassword) {
-                authData[socket].Host = true;
+                authData[object.clientKey].Host = true;
             }
-            if (authData[socket].Auth) {
+            if (authData[object.clientKey].Auth) {
                 socket.send(JSON.stringify(NameJSON))
             } else {
                 socket.send(JSON.stringify(AuthFailedJSON))
@@ -178,9 +181,9 @@ server.on('connection', function(socket) {
 
         if (object.type === "NAME") { //Set Name
             console.log("Recived Name Message!")
-            if (authData[socket].Auth) {
+            if (authData[object.clientKey].Auth) {
                 let found = false;
-                sockets.forEach(s => {
+                keys.forEach(s => {
                     if (playerData[s] != null) {
                         if (playerData[s].name === object.return.name) {found = true;}
                     }
@@ -188,19 +191,20 @@ server.on('connection', function(socket) {
                 if (found) {
                     socket.send(JSON.stringify(NameTakenJSON));
                 } else {
-                    playerData[socket] = createPlayerData(object.return.name, authData[socket].Host);
+                    playerData[object.clientKey] = createPlayerData(object.return.name, authData[object.clientKey].Host);
                     socket.send(JSON.stringify({
                         return_type: null,
+                        clientKey: object.clientKey,
                         run: [
                             {
                                 name: "Host",
                                 type: "SET",
-                                value: authData[socket].Host
+                                value: authData[object.clientKey].Host
                             },
                             {
                                 name: "Name",
                                 type: "SET",
-                                value: playerData[socket].name
+                                value: playerData[object.clientKey].name
                             }
                         ]
                     }));
@@ -210,17 +214,18 @@ server.on('connection', function(socket) {
 
         if (object.type === "START") {
             console.log("Recived Start Message!");
-            if (authData[socket].Host) {
+            if (authData[object.clientKey].Host) {
                 if (sockets.length >= 2) {
                     if (sockets.length <= 6) {
                         build_pile_1 = [], build_pile_2 = [], build_pile_3 = [], build_pile_4 = [], turn_index = 0;
                         draw_pile = [...cards];
                         shuffle(draw_pile);
                         if (sockets.length <= 4) {
-                            sockets.forEach(s => {
+                            keys.forEach(s => {
                                 playerData[s].stock_pile = popMultCard(draw_pile, 30);
-                                s.send(JSON.stringify({
+                                authData[s].socket.send(JSON.stringify({
                                     return_type: null,
+                                    clientKey: s,
                                     run: [
                                         {
                                             name: "StockCard",
@@ -231,10 +236,11 @@ server.on('connection', function(socket) {
                                 }));
                             });
                         } else {
-                            sockets.forEach(s => {
+                            keys.forEach(s => {
                                 playerData[s].stock_pile = popMultCard(draw_pile, 20);
-                                s.send(JSON.stringify({
+                                authData[s].socket.send(JSON.stringify({
                                     return_type: null,
+                                    clientKey: s,
                                     run: [
                                         {
                                             name: "StockCard",
@@ -245,10 +251,11 @@ server.on('connection', function(socket) {
                                 }));
                             });
                         }
-                        sockets.forEach(s => {
+                        keys.forEach(s => {
                             playerData[s].hand = popMultCard(draw_pile, 5);
-                            s.send(JSON.stringify({
+                            authData[s].socket.send(JSON.stringify({
                                 return_type: null,
+                                clientKey: s,
                                 run: [
                                     {
                                         name: "Hand1Card",
@@ -290,82 +297,121 @@ server.on('connection', function(socket) {
         }
         
         if (object.type === "PLACE") {
-            console.log("REcived Place Message!");
-            if (socket == sockets[turn_index]) {
+            console.log("Recived Place Message!");
+            if (object.clientKey == keys[turn_index]) {
                 let pop = object.return.pop;
                 let push = object.return.push;
                 if (!((push === "Discard1Card" || push === "Discard2Card" || push === "Discard3Card" || push === "Discard4Card") && (pop === "Discard1Card" || pop === "Discard2Card" || pop === "Discard3Card" || pop === "Discard4Card"))) {
                     if (!((push === "Discard1Card" || push === "Discard2Card" || push === "Discard3Card" || push === "Discard4Card") && pop === "StockCard")) {
                         if (push === "Discard1Card" || push === "Discard2Card" || push === "Discard3Card" || push === "Discard4Card") {
-                            pushCard(translateDeckName(push, socket), popHandCard(pop, socket));
+                            pushCard(translateDeckName(push, object.clientKey), popHandCard(pop, object.clientKey));
                             turn_index++;
-                            if (turn_index == sockets.length) turn_index = 0;
-                        } else if (pop === "StockCard") {
-                            if (CheckCardPlacement(translateDeckName(push, socket), getTopCard(translateDeckName(pop, socket)))) {
-                                pushCard(translateDeckName(push, socket), getTopCard(translateDeckName(pop, socket)));
+                            if (turn_index == keys.length) turn_index = 0;
+                            for (let i=0;i<5;i++) {
+                                if (playerData[keys[turn_index]].hand[i] == null || playerData[keys[turn_index]].hand[i] == undefined) {
+                                    playerData[keys[turn_index]].hand[i] = popCard(draw_pile);
+                                }
                             }
-                        } else if (pop === "Hand1" || pop === "Hand2" || pop === "Hand3" || pop === "Hand4" || pop === "Hand5") {
-                            if (CheckCardPlacement(translateDeckName(push, socket), translateDeckName(pop, socket))) {
-                                pushCard(translateDeckName(push, socket), popHandCard(pop, socket));
+                            keys.forEach(s => {
+                                authData[s].socket.send(JSON.stringify({
+                                    return_type: null,
+                                    clientkey: keys[turn_index],
+                                    run: [
+                                        {
+                                            name: "Hand1Card",
+                                            type: "SET",
+                                            value: playerData[keys[turn_index]].hand[0]
+                                        },
+                                        {
+                                            name: "Hand2Card",
+                                            type: "SET",
+                                            value: playerData[keys[turn_index]].hand[1]
+                                        },
+                                        {
+                                            name: "Hand3Card",
+                                            type: "SET",
+                                            value: playerData[keys[turn_index]].hand[2]
+                                        },
+                                        {
+                                            name: "Hand4Card",
+                                            type: "SET",
+                                            value: playerData[keys[turn_index]].hand[3]
+                                        },
+                                        {
+                                            name: "Hand5Card",
+                                            type: "SET",
+                                            value: playerData[keys[turn_index]].hand[4]
+                                        }
+                                    ]
+                                }));
+                            });
+                        } else if (pop === "StockCard") {
+                            if (CheckCardPlacement(translateDeckName(push, object.clientKey), getTopCard(translateDeckName(pop, object.clientKey)))) {
+                                pushCard(translateDeckName(push, object.clientKey), getTopCard(translateDeckName(pop, object.clientKey)));
+                            }
+                        } else if (pop === "Hand1Card" || pop === "Hand2Card" || pop === "Hand3Card" || pop === "Hand4Card" || pop === "Hand5Card") {
+                            if (CheckCardPlacement(translateDeckName(push, object.clientKey), translateDeckName(pop, object.clientKey))) {
+                                pushCard(translateDeckName(push, object.clientKey), popHandCard(pop, object.clientKey));
                             }
                         }
                         socket.send(JSON.stringify({
                             return_type: null,
+                            clientkey: object.clientKey,
                             run: [
                                 {
                                     name: "Hand1Card",
                                     type: "SET",
-                                    value: playerData[socket].hand[0]
+                                    value: playerData[object.clientKey].hand[0]
                                 },
                                 {
                                     name: "Hand2Card",
                                     type: "SET",
-                                    value: playerData[socket].hand[1]
+                                    value: playerData[object.clientKey].hand[1]
                                 },
                                 {
                                     name: "Hand3Card",
                                     type: "SET",
-                                    value: playerData[socket].hand[2]
+                                    value: playerData[object.clientKey].hand[2]
                                 },
                                 {
                                     name: "Hand4Card",
                                     type: "SET",
-                                    value: playerData[socket].hand[3]
+                                    value: playerData[object.clientKey].hand[3]
                                 },
                                 {
                                     name: "Hand5Card",
                                     type: "SET",
-                                    value: playerData[socket].hand[4]
+                                    value: playerData[object.clientKey].hand[4]
                                 },
                                 {
                                     name: "Discard1Card",
                                     type: "SET",
-                                    value: getTopCard(playerData[socket].discard_pile_1)
+                                    value: getTopCard(playerData[object.clientKey].discard_pile_1)
                                 },
                                 {
                                     name: "Discard2Card",
                                     type: "SET",
-                                    value: getTopCard(playerData[socket].discard_pile_2)
+                                    value: getTopCard(playerData[object.clientKey].discard_pile_2)
                                 },
                                 {
                                     name: "Discard3Card",
                                     type: "SET",
-                                    value: getTopCard(playerData[socket].discard_pile_3)
+                                    value: getTopCard(playerData[object.clientKey].discard_pile_3)
                                 },
                                 {
                                     name: "Discard4Card",
                                     type: "SET",
-                                    value: getTopCard(playerData[socket].discard_pile_4)
+                                    value: getTopCard(playerData[object.clientKey].discard_pile_4)
                                 },
                                 {
                                     name: "StockCard",
                                     type: "SET",
-                                    value: getTopCard(playerData[socket].stock_pile)
+                                    value: getTopCard(playerData[object.clientKey].stock_pile)
                                 }
                             ]
                         }));
-                        sockets.forEach(s => {
-                            s.send(JSON.stringify({
+                        keys.forEach(s => {
+                            authData[s].socket.send(JSON.stringify({
                                 return_type: null,
                                 run: [
                                     {
@@ -402,8 +448,6 @@ server.on('connection', function(socket) {
     // When a socket closes, or disconnects, remove it from the array and all other data related to it.
     socket.on('close', function() {
         sockets = sockets.filter(s => s !== socket);
-        authData[socket] = {};
-        playerData[socket] = {};
     });
 });
 
@@ -489,61 +533,79 @@ function translateDeckName(name, socket) {
         return build_pile_4;
     } else if (name === "StockCard") {
         return playerData[socket].stock_pile;
-    } else if (name === "Hand1") {
+    } else if (name === "Hand1Card") {
         return playerData[socket].hand[0];
-    } else if (name === "Hand2") {
+    } else if (name === "Hand2Card") {
         return playerData[socket].hand[1];
-    } else if (name === "Hand3") {
+    } else if (name === "Hand3Card") {
         return playerData[socket].hand[2];
-    } else if (name === "Hand4") {
+    } else if (name === "Hand4Card") {
         return playerData[socket].hand[3];
-    } else if (name === "Hand5") {
+    } else if (name === "Hand5Card") {
         return playerData[socket].hand[4];
     }
 }
 
 function popHandCard(name, socket) {
-    if (name === "Hand1") {
-        return popCard(playerData[sockets].hand[0]);
-    } else if (name === "Hand2") {
-        return popCard(playerData[sockets].hand[1]);
-    } else if (name === "Hand3") {
-        return popCard(playerData[sockets].hand[2]);
-    } else if (name === "Hand4") {
-        return popCard(playerData[sockets].hand[3]);
-    } else if (name === "Hand5") {
-        return popCard(playerData[sockets].hand[4]);
+    if (name === "Hand1Card") {
+        let card = playerData[socket].hand[0];
+        playerData[socket].hand[0] = null;
+        return card;
+    } else if (name === "Hand2Card") {
+        let card = playerData[socket].hand[1];
+        playerData[socket].hand[1] = null;
+        return card;
+    } else if (name === "Hand3Card") {
+        let card = playerData[socket].hand[2];
+        playerData[socket].hand[2] = null;
+        return card;
+    } else if (name === "Hand4Card") {
+        let card = playerData[socket].hand[3];
+        playerData[socket].hand[3] = null;
+        return card;
+    } else if (name === "Hand5Card") {
+        let card = playerData[socket].hand[4];
+        playerData[socket].hand[4] = null;
+        return card;
     }
 }
 
 function CheckCardPlacement(deck, card) {
-    if (card === "SB") return true;
+    let okay = false;
     let top_card = getTopCard(deck);
+    if (top_card != undefined && top_card != null) top_card = top_card.replace(/~SB~/g, "");
     switch (top_card) {
-        case null || undefined:
-            if (card === "1") return true;
+        case null:
+            if (card === "1") okay = true;
+        case undefined:
+            if (card === "1") okay = true;
         case "1":
-            if (card === "2") return true;
+            if (card === "2") okay = true;
         case "2":
-            if (card === "3") return true;
+            if (card === "3") okay = true;
         case "3":
-            if (card === "4") return true;
+            if (card === "4") okay = true;
         case "4":
-            if (card === "5") return true;
+            if (card === "5") okay = true;
         case "5":
-            if (card === "6") return true;
+            if (card === "6") okay = true;
         case "6":
-            if (card === "7") return true;
+            if (card === "7") okay = true;
         case "7":
-            if (card === "8") return true;
+            if (card === "8") okay = true;
         case "8":
-            if (card === "9") return true;
+            if (card === "9") okay = true;
         case "9":
-            if (card === "10") return true;
+            if (card === "10") okay = true;
         case "10":
-            if (card === "11") return true;
+            if (card === "11") okay = true;
         case "11":
-            if (card === "12") return true;
+            if (card === "12") okay = true;
+        if (card === "SB") {
+            okay = true;
+            card = "~SB~" + toString(parseInt(top_card) + 1);
+        }
+
     }
-    return false;
+    return okay;
 }
