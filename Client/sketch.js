@@ -262,7 +262,6 @@ function socketMessage(event) {
         });
         data.type = type;
         data.clientKey = key;
-        console.log(key);
         if (type != null) socket.send(JSON.stringify(data));
     }
 }
