@@ -414,6 +414,26 @@ server.on('connection', function(socket) {
                             if (CheckCardPlacement(translateDeckName(push, object.clientKey), getTopCard(translateDeckName(pop, object.clientKey)))) {
                                 pushCard(translateDeckName(push, object.clientKey), popCard(translateDeckName(pop, object.clientKey)));
                             }
+                            if (pop === "StockCard" && playerData[keys[object.clientKey]].stock_pile.length <= 0) {
+                                keys.forEach(s => {
+                                    s.send(JSON.stringify({
+                                        return_type: null,
+                                        clicntKey: null,
+                                        run: [
+                                            {
+                                                name: "WinMessage",
+                                                type: "MESSAGE",
+                                                info: playerData[keys[object.clientKey]].name + " has won the game!"
+                                            },
+                                            {
+                                                name: "WinMessage_02",
+                                                type: "MESSAGE",
+                                                info: "Please wait for the host to start a new game!"
+                                            }
+                                        ]
+                                    }));
+                                });
+                            } 
                         } else if (pop === "Hand1Card" || pop === "Hand2Card" || pop === "Hand3Card" || pop === "Hand4Card" || pop === "Hand5Card") {
                             if (translateDeckName(pop, object.clientKey) === "SB") {
                                 let top_card = getTopCard(translateDeckName(push, object.clientKey));
