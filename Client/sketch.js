@@ -1,4 +1,4 @@
-const WSURL = "ws://localhost:15000";
+const WSURL = "ws://192.168.1.224:15000";
 let socket;
 let key;
 
@@ -184,6 +184,7 @@ function mouseClicked() {
 
 function drawCard(cardText, pos, size, tooltip) {
     if (cardText != null && cardText != undefined && cardText != "") {
+        if (typeof(cardText) !== "string") cardText = "ERROR";
         cardText = cardText.replace(/~SB~/g, "");
         textAlign(CENTER, CENTER);
         fill(255);
@@ -244,12 +245,17 @@ function socketError(event) {
 function socketMessage(event) {
     let object = JSON.parse(event.data);
     if (object.clientKey != null && object.clientKey != undefined && object.clientKey != key) {
+        console.log("NOT ME!");
         object = {};
         return;
     } else {
+        console.log(key);
+        console.log(object.clientKey);
+        console.log (object.return_type);
         let type = object.return_type;
         let data = {return: {}};
         object.run.forEach(command => {
+            console.log(command.name);
             if (command.type === "MESSAGE") {
                 data.return[command.name] = infoMessage(command.info);
             }
@@ -278,6 +284,7 @@ function infoPrompt(info) {
 }
 
 function setValue(key, value) {
+    console.log("Setting: '" + key + "' to: '" + value + "'!");
     playerData[key] = value;
     return value;
 }

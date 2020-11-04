@@ -160,12 +160,9 @@ server.on('connection', function(socket) {
     // When you receive a message, do stuff
     socket.on('message', function(msg) {
         let object = JSON.parse(msg) //create Object
-        console.log(object.clientKey);
-
         if (object.type === "LOGIN") { //Login
             console.log("Recived Login message!");
             authData[object.clientKey] = {socket: socket};
-            keys.push(object.clientKey);
             if (object.return.password === password) {
                 authData[object.clientKey].Auth = true;
             }
@@ -173,6 +170,7 @@ server.on('connection', function(socket) {
                 authData[object.clientKey].Host = true;
             }
             if (authData[object.clientKey].Auth) {
+                keys.push(object.clientKey);
                 socket.send(JSON.stringify(NameJSON))
             } else {
                 socket.send(JSON.stringify(AuthFailedJSON))
@@ -351,17 +349,26 @@ server.on('connection', function(socket) {
                     if (!((push === "Discard1Card" || push === "Discard2Card" || push === "Discard3Card" || push === "Discard4Card") && pop === "StockCard")) {
                         if (push === "Discard1Card" || push === "Discard2Card" || push === "Discard3Card" || push === "Discard4Card") {
                             pushCard(translateDeckName(push, object.clientKey), popHandCard(pop, object.clientKey));
+                            console.log(turn_index);
                             turn_index++;
                             if (turn_index == keys.length) turn_index = 0;
+                            console.log(turn_index);
                             for (let i=0;i<5;i++) {
                                 if (playerData[keys[turn_index]].hand[i] == null || playerData[keys[turn_index]].hand[i] == undefined) {
                                     playerData[keys[turn_index]].hand[i] = popCard(draw_pile);
+                                    while (typeof(playerData[keys[turn_index]].hand[i]) !== "string") {
+                                        console.log("FIXING ERROR CARD! Client Key: " + [keys[turn_index]]);
+                                        console.log("Old Value: " + playerData[keys[turn_index]].hand[i]);
+                                        playerData[keys[turn_index]].hand[i] = popCard(draw_pile);
+                                        console.log("New Value: " + playerData[keys[turn_index]].hand[i]);
+                                    }
                                 }
                             }
                             keys.forEach(s => {
+                                console.log(playerData[keys[turn_index]].hand);
                                 authData[s].socket.send(JSON.stringify({
                                     return_type: null,
-                                    clientkey: keys[turn_index],
+                                    clientKey: keys[turn_index],
                                     run: [
                                         {
                                             name: "TurnAlert",
@@ -396,7 +403,7 @@ server.on('connection', function(socket) {
                                     ]
                                 }));
                             });
-                        } else if (pop === "StockCard" || pop === "Discard1Card" || pop === "Discard2Card" || pop === "Discard3card" || pop === "Discard4Card") {
+                        } else if (pop === "StockCard" || pop === "Discard1Card" || pop === "Discard2Card" || pop === "Discard3Card" || pop === "Discard4Card") {
                             if (getTopCard(translateDeckName(pop, object.clientKey)) === "SB") {
                                 let old = popCard(translateDeckName(pop, object.clientKey));
                                 let top_card = getTopCard(translateDeckName(push, object.clientKey));
