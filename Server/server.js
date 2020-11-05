@@ -349,10 +349,8 @@ server.on('connection', function(socket) {
                     if (!((push === "Discard1Card" || push === "Discard2Card" || push === "Discard3Card" || push === "Discard4Card") && pop === "StockCard")) {
                         if (push === "Discard1Card" || push === "Discard2Card" || push === "Discard3Card" || push === "Discard4Card") {
                             pushCard(translateDeckName(push, object.clientKey), popHandCard(pop, object.clientKey));
-                            console.log(turn_index);
                             turn_index++;
                             if (turn_index == keys.length) turn_index = 0;
-                            console.log(turn_index);
                             for (let i=0;i<5;i++) {
                                 if (playerData[keys[turn_index]].hand[i] == null || playerData[keys[turn_index]].hand[i] == undefined) {
                                     playerData[keys[turn_index]].hand[i] = popCard(draw_pile);
@@ -365,7 +363,6 @@ server.on('connection', function(socket) {
                                 }
                             }
                             keys.forEach(s => {
-                                console.log(playerData[keys[turn_index]].hand);
                                 authData[s].socket.send(JSON.stringify({
                                     return_type: null,
                                     clientKey: keys[turn_index],

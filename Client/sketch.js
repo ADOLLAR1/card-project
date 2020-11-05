@@ -245,17 +245,12 @@ function socketError(event) {
 function socketMessage(event) {
     let object = JSON.parse(event.data);
     if (object.clientKey != null && object.clientKey != undefined && object.clientKey != key) {
-        console.log("NOT ME!");
         object = {};
         return;
     } else {
-        console.log(key);
-        console.log(object.clientKey);
-        console.log (object.return_type);
         let type = object.return_type;
         let data = {return: {}};
         object.run.forEach(command => {
-            console.log(command.name);
             if (command.type === "MESSAGE") {
                 data.return[command.name] = infoMessage(command.info);
             }
