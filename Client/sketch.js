@@ -1,4 +1,4 @@
-const WSURL = "ws://192.168.1.224:15000";
+const WSURL = "ws://127.0.0.1:15000";
 let socket;
 let key;
 
