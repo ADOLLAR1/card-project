@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        function makeid(length) {
+            var result           = '';
+            var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            var charactersLength = characters.length;
+            for ( var i = 0; i < length; i++ ) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+            }
+            result += "~BOT~";
+            return result;
+        }
+
+        function test() {
+            document.getElementById("p").innerHTML = makeid(127);
+        }
+    </script>
+</head>
+<body>
+    <button onclick="test();">PRESS</button>
+    <p id="p"></p>
+</body>
+</html>
