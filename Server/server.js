@@ -29,6 +29,11 @@ const hostpassword = "GimmieHost"
     JSON Messages
 */
 
+const CheckJSON = {
+    return_type: "CHECK",
+    run: []
+}
+
 const LoginJSON = {
     return_type: "LOGIN",
     run: [
@@ -155,11 +160,19 @@ server.on('connection', function(socket) {
     console.log("Connection recived!");
     
     
-    socket.send(JSON.stringify(LoginJSON));
+    socket.send(JSON.stringify(CheckJSON));
 
     // When you receive a message, do stuff
     socket.on('message', function(msg) {
         let object = JSON.parse(msg) //create Object
+        if (object.type === "CHECK") {
+            if (keys.includes(object.clientKey)) {
+                authData[object.clientKey].socket = socket;
+            } else {
+                socket.send(JSON.stringify(LoginJSON));
+            }
+        }
+
         if (object.type === "LOGIN") { //Login
             console.log("Recived Login message!");
             authData[object.clientKey] = {socket: socket};
@@ -411,9 +424,9 @@ server.on('connection', function(socket) {
                             if (CheckCardPlacement(translateDeckName(push, object.clientKey), getTopCard(translateDeckName(pop, object.clientKey)))) {
                                 pushCard(translateDeckName(push, object.clientKey), popCard(translateDeckName(pop, object.clientKey)));
                             }
-                            if (pop === "StockCard" && playerData[keys[object.clientKey]].stock_pile.length <= 0) {
+                            if (pop === "StockCard" && playerData[object.clientKey].stock_pile.length <= 0) {
                                 keys.forEach(s => {
-                                    s.send(JSON.stringify({
+                                    authData[s].socket.send(JSON.stringify({
                                         return_type: null,
                                         clicntKey: null,
                                         run: [
