@@ -235,7 +235,7 @@ function socketOpen(event) {
 }
 
 function socketClose(event) {
-
+    createWSConnection();
 }
 
 function socketError(event) {
@@ -263,7 +263,7 @@ function socketMessage(event) {
         });
         data.type = type;
         data.clientKey = key;
-        if (type != null) socket.send(JSON.stringify(data));
+        if (type != null && type != undefined) socket.send(JSON.stringify(data));
     }
 }
 
