@@ -7,7 +7,12 @@ let playerData = {};
 function preload() {}
 
 function setup() {
-    key = makeid(127);
+    key = prompt("Do you have a client key? (Only use if you got disconnected)");
+    if (key === "" || key == undefined || key == null) {
+        key = makeid(127);
+    }
+    alert("If you ever get disconnected please use the following client key in the previous message box to reconnect to the game. (Failure to do this will result in server bugs which requires a game restart!)");
+    alert("Client Key: " + key);
     createCanvas(800,800);
     createWSConnection();
     playerData.Discard = "Cannot Discard";
@@ -204,7 +209,7 @@ function drawCard(cardText, pos, size, tooltip) {
         } else if (cardText === "21" || cardText === "22" || cardText === "23" || cardText === "24") {
             fill(0,0,0);
         } else if (cardText === "RC") {
-            fill(127,127,0);
+            fill(0,127,127);
         } else {
             fill(255,0,0);
         }
@@ -307,7 +312,7 @@ function checkPoint(x1,y1,x2) {
 
 function makeid(length) {
     var result           = '';
-    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var characters       = 'BCDFGHJKLMNPQRSTVWXZbcdfghjklmnpqrstvwxz0123456789';  //Removed some letters to make sure no words can be made!
     var charactersLength = characters.length;
     for ( var i = 0; i < length; i++ ) {
        result += characters.charAt(Math.floor(Math.random() * charactersLength));
