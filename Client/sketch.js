@@ -209,7 +209,7 @@ function drawCard(cardText, pos, size, tooltip) {
         } else if (cardText === "21" || cardText === "22" || cardText === "23" || cardText === "24") {
             fill(0,0,0);
         } else if (cardText === "RC") {
-            fill(0,127,0127);
+            fill(0,127,127);
         } else {
             fill(255,0,0);
         }

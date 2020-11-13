@@ -186,6 +186,7 @@ function drawCard(cardText, pos, size, tooltip) {
     if (cardText != null && cardText != undefined && cardText != "") {
         if (typeof(cardText) !== "string") cardText = "ERROR";
         cardText = cardText.replace(/~SB~/g, "");
+        cardText = cardText.replace(/~RC~/g, "");
         textAlign(CENTER, CENTER);
         fill(255);
         stroke(0);
@@ -203,7 +204,7 @@ function drawCard(cardText, pos, size, tooltip) {
         } else if (cardText === "21" || cardText === "22" || cardText === "23" || cardText === "24") {
             fill(0,0,0);
         } else if (cardText === "RC") {
-            fill(0,127,0127);
+            fill(0,127,127);
         } else {
             fill(255,0,0);
         }
@@ -269,6 +270,10 @@ function socketMessage(event) {
                 data.return[command.name] = setValue(command.name, command.value);
             }
             if (command.name === "TurnAlert") {
+                takeTurn();
+            }
+            if (command.name === "WinMessage") {
+                socket.send(JSON.stringify({type:"START", clientKey: key, return: {extended: false, remove: false}}));
                 takeTurn();
             }
         });

@@ -411,6 +411,7 @@ server.on('connection', function(socket) {
                                         console.log("Old Value: " + playerData[keys[turn_index]].hand[i]);
                                         playerData[keys[turn_index]].hand[i] = popCard(draw_pile);
                                         console.log("New Value: " + playerData[keys[turn_index]].hand[i]);
+                                        countCards();
                                     }
                                 }
                             }
