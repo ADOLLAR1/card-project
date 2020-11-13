@@ -245,6 +245,7 @@ server.on('connection', function(socket) {
             if (authData[object.clientKey].Host) {
                 if (sockets.length >= 2) {
                     if (sockets.length <= 6) {
+                        turn_index = 0;
                         build_pile_1 = [], build_pile_2 = [], build_pile_3 = [], build_pile_4 = [], turn_index = 0;
                         draw_pile = [...cards];
                         if (object.return.extended) {
@@ -263,6 +264,10 @@ server.on('connection', function(socket) {
                         shuffle(draw_pile);
                         if (sockets.length <= 4) {
                             keys.forEach(s => {
+                                playerData[s].discard_pile_1 = [];
+                                playerData[s].discard_pile_2 = [];
+                                playerData[s].discard_pile_3 = [];
+                                playerData[s].discard_pile_4 = [];
                                 playerData[s].stock_pile = popMultCard(draw_pile, 30);
                                 authData[s].socket.send(JSON.stringify({
                                     return_type: null,
@@ -278,6 +283,10 @@ server.on('connection', function(socket) {
                             });
                         } else {
                             keys.forEach(s => {
+                                playerData[s].discard_pile_1 = [];
+                                playerData[s].discard_pile_2 = [];
+                                playerData[s].discard_pile_3 = [];
+                                playerData[s].discard_pile_4 = [];
                                 playerData[s].stock_pile = popMultCard(draw_pile, 20);
                                 authData[s].socket.send(JSON.stringify({
                                     return_type: null,
@@ -452,6 +461,10 @@ server.on('connection', function(socket) {
                                 if (top_card != undefined && top_card != null) top_card = top_card.replace(/~RC~/g, "");
                                 if (top_card == null || top_card == undefined || top_card == Number.NaN) top_card = "0";
                                 pushCard(translateDeckName(pop, object.clientKey),"~SB~".concat(parseInt(top_card) + 1));
+                            }
+                            if (getTopCard(translateDeckName(pop, object.clientKey)) === "RC") {
+                                let old = popCard(translateDeckName(pop, object.clientKey));
+                                let top_card = getTopCard(translateDeckName(push, object.clientKey));
                                 if (top_card != undefined && top_card != null) top_card = top_card.replace(/~SB~/g, "");
                                 if (top_card != undefined && top_card != null) top_card = top_card.replace(/~RC~/g, "");
                                 if ((top_card == null || top_card == undefined || top_card == Number.NaN || top_card === "0") && old === "RC") return;
@@ -461,6 +474,7 @@ server.on('connection', function(socket) {
                                 pushCard(translateDeckName(push, object.clientKey), popCard(translateDeckName(pop, object.clientKey)));
                             }
                             if (pop === "StockCard" && playerData[object.clientKey].stock_pile.length <= 0) {
+                                turn_index = -1;
                                 keys.forEach(s => {
                                     authData[s].socket.send(JSON.stringify({
                                         return_type: null,
@@ -490,6 +504,7 @@ server.on('connection', function(socket) {
                                 setHandCard(pop, object.clientKey, "~SB~".concat(parseInt(top_card) + 1));
                             }
                             if (translateDeckName(pop, object.clientKey) === "RC") {
+                                let top_card = getTopCard(translateDeckName(push, object.clientKey));
                                 if (top_card != undefined && top_card != null) top_card = top_card.replace(/~SB~/g, "");
                                 if (top_card != undefined && top_card != null) top_card = top_card.replace(/~RC~/g, "");
                                 if ((top_card == null || top_card == undefined || top_card == Number.NaN || top_card === "0") && translateDeckName(pop, object.clientKey) === "RC") return;
@@ -511,27 +526,27 @@ server.on('connection', function(socket) {
                                             {
                                                 name: "Hand1Card",
                                                 type: "SET",
-                                                value: playerData[s].hand[0]
+                                                value: playerData[object.clientKey].hand[0]
                                             },
                                             {
                                                 name: "Hand2Card",
                                                 type: "SET",
-                                                value: playerData[s].hand[1]
+                                                value: playerData[object.clientKey].hand[1]
                                             },
                                             {
                                                 name: "Hand3Card",
                                                 type: "SET",
-                                                value: playerData[s].hand[2]
+                                                value: playerData[object.clientKey].hand[2]
                                             },
                                             {
                                                 name: "Hand4Card",
                                                 type: "SET",
-                                                value: playerData[s].hand[3]
+                                                value: playerData[object.clientKey].hand[3]
                                             },
                                             {
                                                 name: "Hand5Card",
                                                 type: "SET",
-                                                value: playerData[s].hand[4]
+                                                value: playerData[object.clientKey].hand[4]
                                             }
                                         ]
                                     }));
@@ -839,6 +854,8 @@ function CheckCardPlacement(deck, card) {
     if (card != undefined && card != null && card.includes("~RC~")) return true;
     if (top_card != undefined && top_card != null) top_card = top_card.replace(/~SB~/g, "");
     if (card != undefined && card != null) card = card.replace(/~SB~/g, "");
+    if (top_card != undefined && top_card != null) top_card = top_card.replace(/~RC~/g, "");
+    if (card != undefined && card != null) card = card.replace(/~RC~/g, "");
     if (top_card == null || top_card == undefined || top_card == Number.NaN) top_card = "0";
     top_card = parseInt(top_card);
     card = parseInt(card);
@@ -868,6 +885,6 @@ function countCards() {
         }
     }
     console.log("Card Amount: " + count);
-    if (count != 162) console.log("CARD ERROR");
+    if (count != 162 && count != 180 && count != 324) console.log("CARD ERROR");
     console.log(draw_pile);
 }

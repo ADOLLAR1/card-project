@@ -190,12 +190,20 @@ function drawCard(cardText, pos, size, tooltip) {
         fill(255);
         stroke(0);
         rect(pos.x,pos.y,size,size*2, 5, 5, 5, 5);
-        if (cardText === "1" || cardText === "2" || cardText === "3" || cardText === "4") {
+        if (cardText === "0" || cardText === "1" || cardText === "2" || cardText === "3" || cardText === "4") {
             fill(0,0,255);
         } else if (cardText === "5" || cardText === "6" || cardText === "7" || cardText === "8") {
             fill(0,255,0);
         } else if (cardText === "9" || cardText === "10" || cardText === "11" || cardText === "12") {
             fill(255,127,0);
+        } else if (cardText === "13" || cardText === "14" || cardText === "15" || cardText === "16") {
+            fill(0,255,255);
+        } else if (cardText === "17" || cardText === "18" || cardText === "19" || cardText === "20") {
+            fill(127,0,255);
+        } else if (cardText === "21" || cardText === "22" || cardText === "23" || cardText === "24") {
+            fill(0,0,0);
+        } else if (cardText === "RC") {
+            fill(0,127,0127);
         } else {
             fill(255,0,0);
         }
