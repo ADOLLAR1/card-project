@@ -18,9 +18,26 @@ const cards = [ "1","1","1","1","1","1","1","1","1","1","1","1",
                 "12","12","12","12","12","12","12","12","12","12","12","12",
                 "SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB" ]
 
+const extended_cards = ["13","13","13","13","13","13","13","13","13","13","13","13",
+                        "14","14","14","14","14","14","14","14","14","14","14","14",
+                        "15","15","15","15","15","15","15","15","15","15","15","15",
+                        "16","16","16","16","16","16","16","16","16","16","16","16",
+                        "17","17","17","17","17","17","17","17","17","17","17","17",
+                        "18","18","18","18","18","18","18","18","18","18","18","18",
+                        "19","19","19","19","19","19","19","19","19","19","19","19",
+                        "20","20","20","20","20","20","20","20","20","20","20","20",
+                        "21","21","21","21","21","21","21","21","21","21","21","21",
+                        "22","22","22","22","22","22","22","22","22","22","22","22",
+                        "23","23","23","23","23","23","23","23","23","23","23","23",
+                        "24","24","24","24","24","24","24","24","24","24","24","24"]
+
+const remove_cards = [  "RC","RC","RC","RC","RC","RC","RC","RC","RC","RC","RC","RC","RC","RC","RC","RC","RC","RC"  ]
+
 let draw_pile = [], build_pile_1 = [], build_pile_2 = [], build_pile_3 = [], build_pile_4 = [], build_piles = [];
 
 let turn_index = 0;
+
+let topCard = "12";
 
 const password = "LetUsPlay";
 const hostpassword = "GimmieHost"
@@ -195,7 +212,7 @@ server.on('connection', function(socket) {
             if (authData[object.clientKey].Auth) {
                 let found = false;
                 keys.forEach(s => {
-                    if (playerData[s] != null) {
+                    if (playerData[s] != null && playerData[s] != undefined) {
                         if (playerData[s].name === object.return.name) {found = true;}
                     }
                 });
@@ -230,6 +247,19 @@ server.on('connection', function(socket) {
                     if (sockets.length <= 6) {
                         build_pile_1 = [], build_pile_2 = [], build_pile_3 = [], build_pile_4 = [], turn_index = 0;
                         draw_pile = [...cards];
+                        if (object.return.extended) {
+                            topCard = "24"
+                            for (let i=0;i<extended_cards.length;i++) {
+                                draw_pile.push(extended_cards[i])
+                            }
+                        } else {
+                            topCard = "12"
+                        }
+                        if (object.return.remove) {
+                            for (let i=0;i<remove_cards.length;i++) {
+                                draw_pile.push(remove_cards[i])
+                            }
+                        }
                         shuffle(draw_pile);
                         if (sockets.length <= 4) {
                             keys.forEach(s => {
@@ -413,13 +443,19 @@ server.on('connection', function(socket) {
                                     ]
                                 }));
                             });
+                            countCards();
                         } else if (pop === "StockCard" || pop === "Discard1Card" || pop === "Discard2Card" || pop === "Discard3Card" || pop === "Discard4Card") {
                             if (getTopCard(translateDeckName(pop, object.clientKey)) === "SB") {
                                 let old = popCard(translateDeckName(pop, object.clientKey));
                                 let top_card = getTopCard(translateDeckName(push, object.clientKey));
                                 if (top_card != undefined && top_card != null) top_card = top_card.replace(/~SB~/g, "");
+                                if (top_card != undefined && top_card != null) top_card = top_card.replace(/~RC~/g, "");
                                 if (top_card == null || top_card == undefined || top_card == Number.NaN) top_card = "0";
                                 pushCard(translateDeckName(pop, object.clientKey),"~SB~".concat(parseInt(top_card) + 1));
+                                if (top_card != undefined && top_card != null) top_card = top_card.replace(/~SB~/g, "");
+                                if (top_card != undefined && top_card != null) top_card = top_card.replace(/~RC~/g, "");
+                                if ((top_card == null || top_card == undefined || top_card == Number.NaN || top_card === "0") && old === "RC") return;
+                                pushCard(translateDeckName(pop, object.clientKey),"~RC~".concat(parseInt(top_card) + -1));
                             }
                             if (CheckCardPlacement(translateDeckName(push, object.clientKey), getTopCard(translateDeckName(pop, object.clientKey)))) {
                                 pushCard(translateDeckName(push, object.clientKey), popCard(translateDeckName(pop, object.clientKey)));
@@ -433,7 +469,7 @@ server.on('connection', function(socket) {
                                             {
                                                 name: "WinMessage",
                                                 type: "MESSAGE",
-                                                info: playerData[keys[object.clientKey]].name + " has won the game!"
+                                                info: playerData[object.clientKey].name + " has won the game!"
                                             },
                                             {
                                                 name: "WinMessage_02",
@@ -448,10 +484,18 @@ server.on('connection', function(socket) {
                             if (translateDeckName(pop, object.clientKey) === "SB") {
                                 let top_card = getTopCard(translateDeckName(push, object.clientKey));
                                 if (top_card != undefined && top_card != null) top_card = top_card.replace(/~SB~/g, "");
+                                if (top_card != undefined && top_card != null) top_card = top_card.replace(/~RC~/g, "");
                                 if (top_card == null || top_card == undefined || top_card == Number.NaN) top_card = "0";
                                 let deck = translateDeckName(pop, object.clientKey);
                                 setHandCard(pop, object.clientKey, "~SB~".concat(parseInt(top_card) + 1));
                             }
+                            if (translateDeckName(pop, object.clientKey) === "RC") {
+                                if (top_card != undefined && top_card != null) top_card = top_card.replace(/~SB~/g, "");
+                                if (top_card != undefined && top_card != null) top_card = top_card.replace(/~RC~/g, "");
+                                if ((top_card == null || top_card == undefined || top_card == Number.NaN || top_card === "0") && translateDeckName(pop, object.clientKey) === "RC") return;
+                                setHandCard(pop, object.clientKey, "~RC~".concat(parseInt(top_card) + -1));
+                            }
+
                             if (CheckCardPlacement(translateDeckName(push, object.clientKey), translateDeckName(pop, object.clientKey))) {
                                 pushCard(translateDeckName(push, object.clientKey), popHandCard(pop, object.clientKey));
                                 let count = 0;
@@ -497,49 +541,65 @@ server.on('connection', function(socket) {
 
                         let card = getTopCard(build_pile_1);
                         if (card != undefined && card != null) card = card.replace(/~SB~/g, "");
-                        if (card === "12") {
+                        if (card != undefined && card != null) card = card.replace(/~RC~/g, "");
+                        if (card === topCard) {
                             for (let i=0;i<build_pile_1.length;i++) {
                                 if (build_pile_1[i].includes("~SB~")) {
                                     build_pile_1[i] = "SB";
                                 }
+                                if (build_pile_1[i].includes("~RC~")) {
+                                    build_pile_1[i] = "RC";
+                                }
+                                draw_pile.push(build_pile_1[i])
                             }
-                            draw_pile.push(build_pile_1);
                             shuffle(draw_pile);
                             build_pile_1 = [];
                         }
                         card = getTopCard(build_pile_2);
                         if (card != undefined && card != null) card = card.replace(/~SB~/g, "");
-                        if (card === "12") {
+                        if (card != undefined && card != null) card = card.replace(/~RC~/g, "");
+                        if (card === topCard) {
                             for (let i=0;i<build_pile_2.length;i++) {
                                 if (build_pile_2[i].includes("~SB~")) {
                                     build_pile_2[i] = "SB";
                                 }
+                                if (build_pile_2[i].includes("~RC~")) {
+                                    build_pile_2[i] = "RC";
+                                }
+                                draw_pile.push(build_pile_2[i])
                             }
-                            draw_pile.push(build_pile_2);
                             shuffle(draw_pile);
                             build_pile_2 = [];
                         }
                         card = getTopCard(build_pile_3);
                         if (card != undefined && card != null) card = card.replace(/~SB~/g, "");
-                        if (card === "12") {
+                        if (card != undefined && card != null) card = card.replace(/~RC~/g, "");
+                        if (card === topCard) {
                             for (let i=0;i<build_pile_3.length;i++) {
                                 if (build_pile_3[i].includes("~SB~")) {
                                     build_pile_3[i] = "SB";
                                 }
+                                if (build_pile_3[i].includes("~RC~")) {
+                                    build_pile_3[i] = "RC";
+                                }
+                                draw_pile.push(build_pile_3[i])
                             }
-                            draw_pile.push(build_pile_3);
                             shuffle(draw_pile);
                             build_pile_3 = [];
                         }
                         card = getTopCard(build_pile_4);
                         if (card != undefined && card != null) card = card.replace(/~SB~/g, "");
-                        if (card === "12") {
+                        if (card != undefined && card != null) card = card.replace(/~RC~/g, "");
+                        if (card === topCard) {
                             for (let i=0;i<build_pile_4.length;i++) {
                                 if (build_pile_4[i].includes("~SB~")) {
                                     build_pile_4[i] = "SB";
                                 }
+                                if (build_pile_4[i].includes("~RC~")) {
+                                    build_pile_4[i] = "RC";
+                                }
+                                draw_pile.push(build_pile_4[i])
                             }
-                            draw_pile.push(build_pile_4);
                             shuffle(draw_pile);
                             build_pile_4 = [];
                         }
@@ -632,7 +692,7 @@ server.on('connection', function(socket) {
             } else {
                 socket.send(JSON.stringify(NotYourTurnJSON));
             }
-        } 
+        }
     });
   
     // When a socket closes, or disconnects, remove it from the array and all other data related to it.
@@ -739,23 +799,23 @@ function translateDeckName(name, socket) {
 function popHandCard(name, socket) {
     if (name === "Hand1Card") {
         let card = playerData[socket].hand[0];
-        playerData[socket].hand[0] = null;
+        playerData[socket].hand[0] = undefined;
         return card;
     } else if (name === "Hand2Card") {
         let card = playerData[socket].hand[1];
-        playerData[socket].hand[1] = null;
+        playerData[socket].hand[1] = undefined;
         return card;
     } else if (name === "Hand3Card") {
         let card = playerData[socket].hand[2];
-        playerData[socket].hand[2] = null;
+        playerData[socket].hand[2] = undefined;
         return card;
     } else if (name === "Hand4Card") {
         let card = playerData[socket].hand[3];
-        playerData[socket].hand[3] = null;
+        playerData[socket].hand[3] = undefined;
         return card;
     } else if (name === "Hand5Card") {
         let card = playerData[socket].hand[4];
-        playerData[socket].hand[4] = null;
+        playerData[socket].hand[4] = undefined;
         return card;
     }
 }
@@ -776,6 +836,7 @@ function setHandCard(name, socket, value) {
 
 function CheckCardPlacement(deck, card) {
     let top_card = getTopCard(deck);
+    if (card != undefined && card != null && card.includes("~RC~")) return true;
     if (top_card != undefined && top_card != null) top_card = top_card.replace(/~SB~/g, "");
     if (card != undefined && card != null) card = card.replace(/~SB~/g, "");
     if (top_card == null || top_card == undefined || top_card == Number.NaN) top_card = "0";
@@ -785,4 +846,28 @@ function CheckCardPlacement(deck, card) {
         return true;
     }
     return false;
+}
+
+function countCards() {
+    let count = 0;
+    count = count + draw_pile.length;
+    count = count + build_pile_1.length;
+    count = count + build_pile_2.length;
+    count = count + build_pile_3.length;
+    count = count + build_pile_4.length;
+    for (let i=0; i<keys.length; i++) {
+        count = count + playerData[keys[i]].discard_pile_1.length;
+        count = count + playerData[keys[i]].discard_pile_2.length;
+        count = count + playerData[keys[i]].discard_pile_3.length;
+        count = count + playerData[keys[i]].discard_pile_4.length;
+        count = count + playerData[keys[i]].stock_pile.length;
+        for (let j=0; j<5;j++) {
+            if (playerData[keys[i]].hand[j] != null && playerData[keys[i]].hand[j] != undefined) {
+                count++;
+            }
+        }
+    }
+    console.log("Card Amount: " + count);
+    if (count != 162) console.log("CARD ERROR");
+    console.log(draw_pile);
 }
