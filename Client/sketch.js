@@ -186,6 +186,7 @@ function drawCard(cardText, pos, size, tooltip) {
     if (cardText != null && cardText != undefined && cardText != "") {
         if (typeof(cardText) !== "string") cardText = "ERROR";
         cardText = cardText.replace(/~SB~/g, "");
+        cardText = cardText.replace(/~RC~/g, "");
         textAlign(CENTER, CENTER);
         fill(255);
         stroke(0);
