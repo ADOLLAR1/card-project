@@ -7,6 +7,7 @@ let playerData = {};
 function preload() {}
 
 function setup() {
+    angleMode(DEGREES);
     key = prompt("Do you have a client key? (Only use if you got disconnected)");
     if (key === "" || key == undefined || key == null) {
         key = makeid(127);
@@ -218,7 +219,10 @@ function drawCard(cardText, pos, size, tooltip) {
         } else if (cardText === "Can Discard") {
             fill(127,255,127);
         }
-        text("* " + cardText + " *",pos.x,pos.y,size,size*2);
+        push();
+        translate(pos.x, pos.y);
+        text("" + cardText + "",0,0,size,size*2);
+        pop();
         fill(0);
         stroke(0,0,0,0);
         textAlign(LEFT, TOP);

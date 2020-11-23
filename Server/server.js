@@ -888,4 +888,8 @@ function countCards() {
     console.log("Card Amount: " + count);
     if (count != 162 && count != 180 && count != 324) console.log("CARD ERROR");
     console.log(draw_pile);
+    console.log(build_pile_1);
+    console.log(build_pile_2);
+    console.log(build_pile_3);
+    console.log(build_pile_4);
 }
