@@ -310,8 +310,8 @@ function socketMessage(event) {
                 takeTurn();
             }
             if (command.name === "WinMessage") {
-                //socket.send(JSON.stringify({type:"START", clientKey: key, return: {extended: false, remove: false}}));
-                //takeTurn();
+                socket.send(JSON.stringify({type:"START", clientKey: key, return: {extended: extendedActive, remove: removeActive}}));
+                takeTurn();
             }
         });
         data.type = type;
