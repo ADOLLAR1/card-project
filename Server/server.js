@@ -393,6 +393,97 @@ server.on('connection', function(socket) {
         
         if (object.type === "PLACE") {
             console.log("Recived Place Message!");
+
+            if (draw_pile.length <= 0) {
+                console.log("Draw Pile Empty");
+                keys.forEach(s => {
+                    authData[s].socket.send(JSON.stringify({
+                        return_type: null,
+                        clientKey: null,
+                        run: [
+                            {
+                                name: "DrawPileEmpty",
+                                type: "MESSAGE",
+                                info: "The Draw Pile is empty! Emptying Discard Piles!"
+                            }
+                        ]
+                    }));
+
+                    playerData[s].discard_pile_1.forEach(c => {
+                        if (c.includes("~SB~")) {
+                            c = "SB";
+                        }
+                        if (c.includes("~RC~")) {
+                            c = "RC";
+                        }
+                        draw_pile.push(c)
+                    });
+                    playerData[s].discard_pile_2.forEach(c => {
+                        if (c.includes("~SB~")) {
+                            c = "SB";
+                        }
+                        if (c.includes("~RC~")) {
+                            c = "RC";
+                        }
+                        draw_pile.push(c)
+                    });
+                    playerData[s].discard_pile_3.forEach(c => {
+                        if (c.includes("~SB~")) {
+                            c = "SB";
+                        }
+                        if (c.includes("~RC~")) {
+                            c = "RC";
+                        }
+                        draw_pile.push(c)
+                    });
+                    playerData[s].discard_pile_4.forEach(c => {
+                        if (c.includes("~SB~")) {
+                            c = "SB";
+                        }
+                        if (c.includes("~RC~")) {
+                            c = "RC";
+                        }
+                        draw_pile.push(c)
+                    });
+
+                    playerData[s].discard_pile_1 = [];
+                    playerData[s].discard_pile_2 = [];
+                    playerData[s].discard_pile_3 = [];
+                    playerData[s].discard_pile_4 = [];
+
+                    shuffle(draw_pile);
+
+                    keys.forEach(s => {
+                        authData[s].socket.send(JSON.stringify({
+                            return_type: s,
+                            run: [
+                                {
+                                    name: "Discard1Card",
+                                    type: "SET",
+                                    value: getTopCard("discard_pile_1", s)
+                                },
+                                {
+                                    name: "Discard2Card",
+                                    type: "SET",
+                                    value: getTopCard("discard_pile_2", s)
+                                },
+                                {
+                                    name: "Discard3Card",
+                                    type: "SET",
+                                    value: getTopCard("discard_pile_3", s)
+                                },
+                                {
+                                    name: "Discard4Card",
+                                    type: "SET",
+                                    value: getTopCard("discard_pile_4", s)
+                                }
+                            ]
+                        }));
+                    });
+
+                });
+            }
+
             if (object.clientKey == keys[turn_index]) {
                 let pop = object.return.pop;
                 let push = object.return.push;
@@ -414,6 +505,13 @@ server.on('connection', function(socket) {
                                         playerData[keys[turn_index]].hand[i] = popCard(draw_pile);
                                         console.log("New Value: " + playerData[keys[turn_index]].hand[i]);
                                         countCards();
+
+                                        if (draw_pile.length <= 0) {
+                                            playerData[keys[turn_index]].hand[i] = undefined;
+                                            console.log("DRAW PILE EMPTY");
+                                            break;
+                                        }
+
                                     }
                                 }
                             }
