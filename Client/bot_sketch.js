@@ -1,6 +1,11 @@
 const WSURL = "ws://127.0.0.1:15000";
 let socket;
 let key;
+let remove;
+let extended;
+let button;
+let removeActive = false;
+let extendedActive = false;
 
 let playerData = {};
 
@@ -8,9 +13,41 @@ function preload() {}
 
 function setup() {
     key = makeid(127);
+    extended = createButton("Extended Cards (false)");
+    remove = createButton("Remove Cards (false)");
+    button = createButton("Start");
+
+    extended.hide();
+    remove.hide();
+    button.hide();
+
     createCanvas(800,800);
     createWSConnection();
     playerData.Discard = "Cannot Discard";
+
+    remove.mousePressed(function() {
+        if (removeActive) {
+            removeActive = false;
+            remove.html("Remove Cards (false)");
+        } else {
+            removeActive = true;
+            remove.html("Remove Cards (true)");
+        }
+    });
+
+    extended.mousePressed(function() {
+        if (extendedActive) {
+            extendedActive = false;
+            extended.html("Extended Cards (false)");
+        } else {
+            extendedActive = true;
+            extended.html("Extended Cards (true)");
+        }
+    });
+
+    button.mousePressed(function() {
+        socket.send(JSON.stringify({type:"START", clientKey: key, return: {extended: extendedActive, remove: removeActive}}));
+    });
 }
 
 function draw() {
@@ -273,7 +310,7 @@ function socketMessage(event) {
                 takeTurn();
             }
             if (command.name === "WinMessage") {
-                socket.send(JSON.stringify({type:"START", clientKey: key, return: {extended: false, remove: false}}));
+                socket.send(JSON.stringify({type:"START", clientKey: key, return: {extended: extendedActive, remove: removeActive}}));
                 takeTurn();
             }
         });
@@ -297,6 +334,19 @@ function infoPrompt(info) {
 function setValue(key, value) {
     console.log("Setting: '" + key + "' to: '" + value + "'!");
     playerData[key] = value;
+
+    if (key === "Host") {
+        if (value) {
+            button.show();
+            remove.show();
+            extended.show();
+        } else {
+            button.hide();
+            remove.hide();
+            extended.hide();
+        }
+    }
+
     return value;
 }
 
@@ -328,14 +378,15 @@ function takeTurn() {
     const push = ["Build1", "Build2", "Build3", "Build4"];
     pop.forEach(c => {
         push.forEach(c1 => {
-            socket.send(JSON.stringify({
-                type: "PLACE",
-                clientKey: key,
-                return: {
-                    pop: c,
-                    push: c1
-                }
-            }));
+            setTimeout(
+                socket.send(JSON.stringify({
+                    type: "PLACE",
+                    clientKey: key,
+                    return: {
+                        pop: c,
+                        push: c1
+                    }
+            })), 10);
         });
     });
     pop.forEach(c => {

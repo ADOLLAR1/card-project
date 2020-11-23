@@ -1,21 +1,59 @@
 const WSURL = "ws://127.0.0.1:15000";
 let socket;
 let key;
+let remove;
+let extended;
+let button;
+let removeActive = false;
+let extendedActive = false;
 
 let playerData = {};
 
 function preload() {}
 
 function setup() {
+    angleMode(DEGREES);
     key = prompt("Do you have a client key? (Only use if you got disconnected)");
     if (key === "" || key == undefined || key == null) {
         key = makeid(127);
     }
     alert("If you ever get disconnected please use the following client key in the previous message box to reconnect to the game. (Failure to do this will result in server bugs which requires a game restart!)");
     alert("Client Key: " + key);
+    extended = createButton("Extended Cards (false)");
+    remove = createButton("Remove Cards (false)");
+    button = createButton("Start");
+
+    extended.hide();
+    remove.hide();
+    button.hide();
+
     createCanvas(800,800);
     createWSConnection();
     playerData.Discard = "Cannot Discard";
+
+    remove.mousePressed(function() {
+        if (removeActive) {
+            removeActive = false;
+            remove.html("Remove Cards (false)");
+        } else {
+            removeActive = true;
+            remove.html("Remove Cards (true)");
+        }
+    });
+
+    extended.mousePressed(function() {
+        if (extendedActive) {
+            extendedActive = false;
+            extended.html("Extended Cards (false)");
+        } else {
+            extendedActive = true;
+            extended.html("Extended Cards (true)");
+        }
+    });
+
+    button.mousePressed(function() {
+        socket.send(JSON.stringify({type:"START", clientKey: key, return: {extended: extendedActive, remove: removeActive}}));
+    });
 }
 
 function draw() {
@@ -218,7 +256,10 @@ function drawCard(cardText, pos, size, tooltip) {
         } else if (cardText === "Can Discard") {
             fill(127,255,127);
         }
-        text("* " + cardText + " *",pos.x,pos.y,size,size*2);
+        push();
+        translate(pos.x, pos.y);
+        text("" + cardText + "",0,0,size,size*2);
+        pop();
         fill(0);
         stroke(0,0,0,0);
         textAlign(LEFT, TOP);
@@ -295,6 +336,19 @@ function infoPrompt(info) {
 function setValue(key, value) {
     console.log("Setting: '" + key + "' to: '" + value + "'!");
     playerData[key] = value;
+
+    if (key === "Host") {
+        if (value) {
+            button.show();
+            remove.show();
+            extended.show();
+        } else {
+            button.hide();
+            remove.hide();
+            extended.hide();
+        }
+    }
+
     return value;
 }
 

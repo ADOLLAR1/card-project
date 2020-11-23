@@ -400,7 +400,9 @@ server.on('connection', function(socket) {
                 if (!((push === "Discard1Card" || push === "Discard2Card" || push === "Discard3Card" || push === "Discard4Card") && (pop === "Discard1Card" || pop === "Discard2Card" || pop === "Discard3Card" || pop === "Discard4Card"))) {
                     if (!((push === "Discard1Card" || push === "Discard2Card" || push === "Discard3Card" || push === "Discard4Card") && pop === "StockCard")) {
                         if (push === "Discard1Card" || push === "Discard2Card" || push === "Discard3Card" || push === "Discard4Card") {
+                            if (translateDeckName(pop, object.clientKey) == null || translateDeckName(pop, object.clientKey) == undefined) return;
                             pushCard(translateDeckName(push, object.clientKey), popHandCard(pop, object.clientKey));
+                            if (getTopCard(translateDeckName(push, object.clientKey)) == undefined) console.log("ERROR IN PUSH");
                             turn_index++;
                             if (turn_index == keys.length) turn_index = 0;
                             for (let i=0;i<5;i++) {
@@ -455,6 +457,7 @@ server.on('connection', function(socket) {
                             });
                             countCards();
                         } else if (pop === "StockCard" || pop === "Discard1Card" || pop === "Discard2Card" || pop === "Discard3Card" || pop === "Discard4Card") {
+                            if (getTopCard(translateDeckName(pop, object.clientKey)) == null || getTopCard(translateDeckName(pop, object.clientKey)) == undefined) return;
                             if (getTopCard(translateDeckName(pop, object.clientKey)) === "SB") {
                                 let old = popCard(translateDeckName(pop, object.clientKey));
                                 let top_card = getTopCard(translateDeckName(push, object.clientKey));
@@ -888,4 +891,8 @@ function countCards() {
     console.log("Card Amount: " + count);
     if (count != 162 && count != 180 && count != 324) console.log("CARD ERROR");
     console.log(draw_pile);
+    console.log(build_pile_1);
+    console.log(build_pile_2);
+    console.log(build_pile_3);
+    console.log(build_pile_4);
 }
