@@ -29,7 +29,8 @@ const extended_cards = ["13","13","13","13","13","13","13","13","13","13","13","
                         "21","21","21","21","21","21","21","21","21","21","21","21",
                         "22","22","22","22","22","22","22","22","22","22","22","22",
                         "23","23","23","23","23","23","23","23","23","23","23","23",
-                        "24","24","24","24","24","24","24","24","24","24","24","24"]
+                        "24","24","24","24","24","24","24","24","24","24","24","24",
+                        "SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB"]
 
 const remove_cards = [  "RC","RC","RC","RC","RC","RC","RC","RC","RC","RC","RC","RC","RC","RC","RC","RC","RC","RC"  ]
 
@@ -620,6 +621,12 @@ server.on('connection', function(socket) {
                                     if (playerData[object.clientKey].hand[i] == null || playerData[object.clientKey].hand[i] == undefined) count++;
                                 }
                                 if (count >= 5) {
+
+                                    if (draw_pile.length <= 4) {
+                                        console.log("DRAW PILE EMPTY");
+                                        FixDrawPile();
+                                    }
+
                                     playerData[object.clientKey].hand = popMultCard(draw_pile, 5);
                                     authData[object.clientKey].socket.send(JSON.stringify({
                                         return_type: null,
@@ -967,6 +974,98 @@ function CheckCardPlacement(deck, card) {
     return false;
 }
 
+function FixDrawPile() {
+    if (true) {
+        console.log("Draw Pile Empty");
+        keys.forEach(s => {
+            authData[s].socket.send(JSON.stringify({
+                return_type: null,
+                clientKey: null,
+                run: [
+                    {
+                        name: "DrawPileEmpty",
+                        type: "MESSAGE",
+                        info: "The Draw Pile is empty! Emptying Discard Piles!"
+                    }
+                ]
+            }));
+
+            playerData[s].discard_pile_1.forEach(c => {
+                if (c.includes("~SB~")) {
+                    c = "SB";
+                }
+                if (c.includes("~RC~")) {
+                    c = "RC";
+                }
+                draw_pile.push(c)
+            });
+            playerData[s].discard_pile_2.forEach(c => {
+                if (c.includes("~SB~")) {
+                    c = "SB";
+                }
+                if (c.includes("~RC~")) {
+                    c = "RC";
+                }
+                draw_pile.push(c)
+            });
+            playerData[s].discard_pile_3.forEach(c => {
+                if (c.includes("~SB~")) {
+                    c = "SB";
+                }
+                if (c.includes("~RC~")) {
+                    c = "RC";
+                }
+                draw_pile.push(c)
+            });
+            playerData[s].discard_pile_4.forEach(c => {
+                if (c.includes("~SB~")) {
+                    c = "SB";
+                }
+                if (c.includes("~RC~")) {
+                    c = "RC";
+                }
+                draw_pile.push(c)
+            });
+
+            playerData[s].discard_pile_1 = [];
+            playerData[s].discard_pile_2 = [];
+            playerData[s].discard_pile_3 = [];
+            playerData[s].discard_pile_4 = [];
+
+            shuffle(draw_pile);
+
+            keys.forEach(s => {
+                authData[s].socket.send(JSON.stringify({
+                    return_type: s,
+                    run: [
+                        {
+                            name: "Discard1Card",
+                            type: "SET",
+                            value: getTopCard("discard_pile_1", s)
+                        },
+                        {
+                            name: "Discard2Card",
+                            type: "SET",
+                            value: getTopCard("discard_pile_2", s)
+                        },
+                        {
+                            name: "Discard3Card",
+                            type: "SET",
+                            value: getTopCard("discard_pile_3", s)
+                        },
+                        {
+                            name: "Discard4Card",
+                            type: "SET",
+                            value: getTopCard("discard_pile_4", s)
+                        }
+                    ]
+                }));
+            });
+
+        });
+    }
+}
+
 function countCards() {
     let count = 0;
     count = count + draw_pile.length;
@@ -987,7 +1086,7 @@ function countCards() {
         }
     }
     console.log("Card Amount: " + count);
-    if (count != 162 && count != 180 && count != 324) console.log("CARD ERROR");
+    if (count != 162 && count != 180 && count != 324 && count != 342) console.log("CARD ERROR");
     console.log(draw_pile);
     console.log(build_pile_1);
     console.log(build_pile_2);

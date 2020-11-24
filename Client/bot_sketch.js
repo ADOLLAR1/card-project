@@ -6,10 +6,15 @@ let extended;
 let button;
 let removeActive = false;
 let extendedActive = false;
+let card;
+let backg;
 
 let playerData = {};
 
-function preload() {}
+function preload() {
+    card = loadImage("Assets/card.png");
+    backg = loadImage("Assets/background.png");
+}
 
 function setup() {
     key = makeid(127);
@@ -52,6 +57,7 @@ function setup() {
 
 function draw() {
     background(127);
+    image(backg,0,0,800,800);
     textSize(18);
     drawCard(playerData.StockCard, createVector(700,600),100, "Stock Pile");
 
@@ -225,8 +231,9 @@ function drawCard(cardText, pos, size, tooltip) {
         cardText = cardText.replace(/~SB~/g, "");
         cardText = cardText.replace(/~RC~/g, "");
         textAlign(CENTER, CENTER);
-        fill(255);
+        fill(0,0,0,0);
         stroke(0);
+        image(card,pos.x,pos.y,size,size*2);
         rect(pos.x,pos.y,size,size*2, 5, 5, 5, 5);
         if (cardText === "0" || cardText === "1" || cardText === "2" || cardText === "3" || cardText === "4") {
             fill(0,0,255);
@@ -250,7 +257,7 @@ function drawCard(cardText, pos, size, tooltip) {
         } else if (cardText === "Can Discard") {
             fill(127,255,127);
         }
-        text("* " + cardText + " *",pos.x,pos.y,size,size*2);
+        text("" + cardText + "",pos.x,pos.y,size,size*2);
         fill(0);
         stroke(0,0,0,0);
         textAlign(LEFT, TOP);
