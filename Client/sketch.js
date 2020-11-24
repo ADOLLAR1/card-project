@@ -8,12 +8,15 @@ let removeActive = false;
 let extendedActive = false;
 let card;
 let backg;
+let font;
 
 let playerData = {};
 
 function preload() {
     card = loadImage("Assets/card.png");
     backg = loadImage("Assets/background.png");
+    font = loadFont("Assets/font.ttf");
+    if (Math.floor(Math.random()*10) == 0) font = loadFont("Assets/font2.ttf");
 }
 
 function setup() {
@@ -64,6 +67,7 @@ function setup() {
 function draw() {
     background(127);
     image(backg,0,0,800,800);
+    textFont(font);
     textSize(18);
     drawCard(playerData.StockCard, createVector(700,600),100, "Stock Pile");
 

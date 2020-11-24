@@ -8,16 +8,24 @@ let removeActive = false;
 let extendedActive = false;
 let card;
 let backg;
+let font;
 
 let playerData = {};
 
 function preload() {
     card = loadImage("Assets/card.png");
     backg = loadImage("Assets/background.png");
+    font = loadFont("Assets/font.ttf");
+    if (Math.floor(Math.random()*10) == 0) font = loadFont("Assets/font2.ttf");
 }
 
 function setup() {
-    key = makeid(127);
+    key = prompt("Do you have a client key? (Only use if you got disconnected)");
+    if (key === "" || key == undefined || key == null) {
+        key = makeid(127);
+    }
+    alert("If you ever get disconnected please use the following client key in the previous message box to reconnect to the game. (Failure to do this will result in server bugs which requires a game restart!)");
+    alert("Client Key: " + key);
     extended = createButton("Extended Cards (false)");
     remove = createButton("Remove Cards (false)");
     button = createButton("Start");
@@ -58,6 +66,7 @@ function setup() {
 function draw() {
     background(127);
     image(backg,0,0,800,800);
+    textFont(font);
     textSize(18);
     drawCard(playerData.StockCard, createVector(700,600),100, "Stock Pile");
 
