@@ -9,6 +9,9 @@ let extendedActive = false;
 let card;
 let backg;
 let font;
+let playerListElement;
+let playerList = [];
+let scaleFactor = 1;
 
 let playerData = {};
 
@@ -20,12 +23,20 @@ function preload() {
 }
 
 function setup() {
+    angleMode(DEGREES);
     key = prompt("Do you have a client key? (Only use if you got disconnected)");
     if (key === "" || key == undefined || key == null) {
         key = makeid(127);
     }
     alert("If you ever get disconnected please use the following client key in the previous message box to reconnect to the game. (Failure to do this will result in server bugs which requires a game restart!)");
     alert("Client Key: " + key);
+    let scale = prompt("If you use a small screen please enter a scale value here. Default size is 800px by 800px. All size values will be diveded by this number. leave blank for 1");
+    if (scale == null || scale == undefined || scale === "") {
+        scaleFactor = 1;
+    } else {
+        scaleFactor = parseInt(scale);
+    }
+    playerListElement = createElement("aside");
     extended = createButton("Extended Cards (false)");
     remove = createButton("Remove Cards (false)");
     button = createButton("Start");
@@ -34,7 +45,7 @@ function setup() {
     remove.hide();
     button.hide();
 
-    createCanvas(800,800);
+    createCanvas(800/scaleFactor,800/scaleFactor);
     createWSConnection();
     playerData.Discard = "Cannot Discard";
 
@@ -68,25 +79,25 @@ function draw() {
     image(backg,0,0,800,800);
     textFont(font);
     textSize(24);
-    drawCard(playerData.StockCard, createVector(700,600),100, "Stock Pile");
+    drawCard(playerData.StockCard, createVector(700/scaleFactor,600/scaleFactor),100/scaleFactor, "Stock Pile");
 
-    drawCard(playerData.Discard1Card, createVector(200,600),100, "Discard Pile");
-    drawCard(playerData.Discard2Card, createVector(300,600),100, "Discard Pile");
-    drawCard(playerData.Discard3Card, createVector(400,600),100, "Discard Pile");
-    drawCard(playerData.Discard4Card, createVector(500,600),100, "Discard Pile");
+    drawCard(playerData.Discard1Card, createVector(200/scaleFactor,600/scaleFactor),100/scaleFactor, "Discard Pile");
+    drawCard(playerData.Discard2Card, createVector(300/scaleFactor,600/scaleFactor),100/scaleFactor, "Discard Pile");
+    drawCard(playerData.Discard3Card, createVector(400/scaleFactor,600/scaleFactor),100/scaleFactor, "Discard Pile");
+    drawCard(playerData.Discard4Card, createVector(500/scaleFactor,600/scaleFactor),100/scaleFactor, "Discard Pile");
 
-    drawCard(playerData.Build1Card, createVector(200,0),100, "Build Pile");
-    drawCard(playerData.Build2Card, createVector(300,0),100, "Build Pile");
-    drawCard(playerData.Build3Card, createVector(400,0),100, "Build Pile");
-    drawCard(playerData.Build4Card, createVector(500,0),100, "Build Pile");
+    drawCard(playerData.Build1Card, createVector(200/scaleFactor,0/scaleFactor),100/scaleFactor, "Build Pile");
+    drawCard(playerData.Build2Card, createVector(300/scaleFactor,0/scaleFactor),100/scaleFactor, "Build Pile");
+    drawCard(playerData.Build3Card, createVector(400/scaleFactor,0/scaleFactor),100/scaleFactor, "Build Pile");
+    drawCard(playerData.Build4Card, createVector(500/scaleFactor,0/scaleFactor),100/scaleFactor, "Build Pile");
 
-    drawCard(playerData.Hand1Card, createVector(150,300),100, "Hand");
-    drawCard(playerData.Hand2Card, createVector(250,300),100, "Hand");
-    drawCard(playerData.Hand3Card, createVector(350,300),100, "Hand");
-    drawCard(playerData.Hand4Card, createVector(450,300),100, "Hand");
-    drawCard(playerData.Hand5Card, createVector(550,300),100, "Hand");
+    drawCard(playerData.Hand1Card, createVector(150/scaleFactor,300/scaleFactor),100/scaleFactor, "Hand");
+    drawCard(playerData.Hand2Card, createVector(250/scaleFactor,300/scaleFactor),100/scaleFactor, "Hand");
+    drawCard(playerData.Hand3Card, createVector(350/scaleFactor,300/scaleFactor),100/scaleFactor, "Hand");
+    drawCard(playerData.Hand4Card, createVector(450/scaleFactor,300/scaleFactor),100/scaleFactor, "Hand");
+    drawCard(playerData.Hand5Card, createVector(550/scaleFactor,300/scaleFactor),100/scaleFactor, "Hand");
 
-    drawCard(playerData.Discard, createVector(0,600), 100, "You should not see this!")
+    drawCard(playerData.Discard, createVector(0/scaleFactor,600/scaleFactor), 100/scaleFactor, "You should not see this!");
 }
 
 function mouseClicked() { 
@@ -396,6 +407,40 @@ function setValue(key, value) {
             remove.hide();
             extended.hide();
         }
+    }
+
+    if (key === "playerList" || key === "selectedPlayer" || key === "otherCards") {
+        let str = "";
+        let tmp = "";
+        let tmp2 = ""
+        playerData.playerList.forEach(p => {
+            if (playerData.selectedPlayer != null && playerData.selectedPlayer != undefined) {
+                if (p === playerData.selectedPlayer) {
+                    tmp = "<span style='color:#FF7F00;'>" +  "=> " + "</span>";
+                } else {
+                    tmp = "";
+                }
+            }
+
+            if (playerData.otherCards == null || playerData.otherCards == undefined) {
+                playerData.otherCards = {};
+            }
+
+            if(playerData.otherCards[p] == null || playerData.otherCards[p] == undefined) {
+                playerData.otherCards[p] = {
+                    "StockCard": " ",
+                    "stockLength": 0
+                };
+            }
+            if (playerData.otherCards[p].stockLength <= 5) {
+                tmp2 = "<span style='color:red;'>" + playerData.otherCards[p]["StockCard"] + "</span>";
+            } else {
+                tmp2 = "<span>" + playerData.otherCards[p]["StockCard"] + "</span>";
+            }
+
+            str = str + "<span>" + tmp + p + " [" + tmp2 + "]" +  "</span><hr/>"
+        });
+        playerListElement.html(str);
     }
 
     return value;

@@ -322,6 +322,14 @@ server.on('connection', function(socket) {
                                 }));
                             });
                         }
+                        let tmp = {}
+                        keys.forEach(s => {
+                            tmp[playerData[s].name] = {
+                                "StockCard": getTopCard(playerData[s].stock_pile),
+                                "StockAmount": playerData[s].stock_pile.length
+                            };
+                        });
+
                         keys.forEach(s => {
                             playerData[s].hand = popMultCard(draw_pile, 5);
                             authData[s].socket.send(JSON.stringify({
@@ -397,6 +405,16 @@ server.on('connection', function(socket) {
                                         name: "StockCard",
                                         type: "SET",
                                         value: getTopCard(playerData[s].stock_pile)
+                                    },
+                                    {
+                                        name: "selectedPlayer",
+                                        type: "SET",
+                                        value: playerData[keys[0]].name
+                                    },
+                                    {
+                                        name: "otherCards",
+                                        type: "SET",
+                                        value: tmp
                                     }
                                 ]
                             }));
@@ -627,7 +645,29 @@ server.on('connection', function(socket) {
                                         ]
                                     }));
                                 });
-                            } 
+                            }
+                            if (pop === "StockCard") {
+                                let tmp = {}
+                                keys.forEach(s => {
+                                    tmp[playerData[s].name] = {
+                                        "StockCard": getTopCard(playerData[s].stock_pile),
+                                        "StockAmount": playerData[s].stock_pile.length
+                                    };
+                                });
+                                keys.forEach(s => {
+                                    authData[s].socket.send(JSON.stringify({
+                                        return_type: null,
+                                        clientKey: null,
+                                        run: [
+                                            {
+                                                name: "otherCards",
+                                                type: "SET",
+                                                value: tmp
+                                            }
+                                        ]
+                                    }));
+                                });
+                            }
                         } else if (pop === "Hand1Card" || pop === "Hand2Card" || pop === "Hand3Card" || pop === "Hand4Card" || pop === "Hand5Card") {
                             if (translateDeckName(pop, object.clientKey) === "SB") {
                                 let top_card = getTopCard(translateDeckName(push, object.clientKey));
