@@ -1,4 +1,5 @@
 const { strict } = require('assert');
+const { emitKeypressEvents } = require('readline');
 const WebSocket = require('ws');
 const server = new WebSocket.Server({
     port: 15000
@@ -237,6 +238,25 @@ server.on('connection', function(socket) {
                             }
                         ]
                     }));
+                    let temp = [];
+                    keys.forEach(s => {
+                        if (playerData[s] != undefined && playerData[s] != null) {
+                            temp.push(playerData[s].name);
+                        }
+                    });
+                    keys.forEach(s => {
+                        authData[s].socket.send(JSON.stringify({
+                            return_type: null,
+                            clientKey: null,
+                            run: [
+                                {
+                                    name: "playerList",
+                                    type: "SET",
+                                    value: temp
+                                }
+                            ]
+                        }));
+                    });
                 }
             }
         }
@@ -550,6 +570,17 @@ server.on('connection', function(socket) {
                                             name: "Hand5Card",
                                             type: "SET",
                                             value: playerData[keys[turn_index]].hand[4]
+                                        }
+                                    ]
+                                }));
+                                authData[s].socket.send(JSON.stringify({
+                                    return_type: null,
+                                    clientKey: null,
+                                    run: [
+                                        {
+                                            name: "selectedPlayer",
+                                            type: "SET",
+                                            value: playerData[keys[turn_index]].name
                                         }
                                     ]
                                 }));

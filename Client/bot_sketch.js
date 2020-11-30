@@ -67,7 +67,7 @@ function draw() {
     background(127);
     image(backg,0,0,800,800);
     textFont(font);
-    textSize(18);
+    textSize(24);
     drawCard(playerData.StockCard, createVector(700,600),100, "Stock Pile");
 
     drawCard(playerData.Discard1Card, createVector(200,600),100, "Discard Pile");
@@ -237,12 +237,20 @@ function mouseClicked() {
 function drawCard(cardText, pos, size, tooltip) {
     if (cardText != null && cardText != undefined && cardText != "") {
         if (typeof(cardText) !== "string") cardText = "ERROR";
-        cardText = cardText.replace(/~SB~/g, "");
-        cardText = cardText.replace(/~RC~/g, "");
+        let sb = false;
+        let rc = false
+        if (cardText.includes("~SB~")) {
+            sb = true
+            cardText = cardText.replace(/~SB~/g, "");
+        }
+        if (cardText.includes("~RC~")) {
+            rc = true
+            cardText = cardText.replace(/~RC~/g, "");
+        }
         textAlign(CENTER, CENTER);
         fill(0,0,0,0);
         stroke(0);
-        image(card,pos.x,pos.y,size,size*2);
+        image(card,pos.x,pos.y,size,size*2)
         rect(pos.x,pos.y,size,size*2, 5, 5, 5, 5);
         if (cardText === "0" || cardText === "1" || cardText === "2" || cardText === "3" || cardText === "4") {
             fill(0,0,255);
@@ -266,7 +274,30 @@ function drawCard(cardText, pos, size, tooltip) {
         } else if (cardText === "Can Discard") {
             fill(127,255,127);
         }
-        text("" + cardText + "",pos.x,pos.y,size,size*2);
+        push();
+        translate(pos.x, pos.y);
+        text("" + cardText + "",0,0,size,size*2);
+        pop();
+        if (sb) {
+            fill(255,0,0);
+            textSize(16);
+            push();
+            translate(pos.x,pos.y);
+            textAlign(RIGHT, TOP);
+            text("SB", 0, 0, size, size*2);
+            pop();
+            textSize(24);
+        }
+        if (rc) {
+            fill(0,127,127);
+            textSize(16);
+            push();
+            translate(pos.x,pos.y);
+            textAlign(RIGHT, TOP);
+            text("RC", 0, 0, size, size*2);
+            pop();
+            textSize(24);
+        }
         fill(0);
         stroke(0,0,0,0);
         textAlign(LEFT, TOP);
@@ -297,7 +328,7 @@ function socketOpen(event) {
 }
 
 function socketClose(event) {
-
+    createWSConnection();
 }
 
 function socketError(event) {
@@ -328,6 +359,10 @@ function socketMessage(event) {
             if (command.name === "WinMessage") {
                 socket.send(JSON.stringify({type:"START", clientKey: key, return: {extended: extendedActive, remove: removeActive}}));
                 takeTurn();
+            }
+            if (command.type === "ADD") {
+                addPlayer(command.value);
+                data.return[command.name] = "OK";
             }
         });
         data.type = type;
@@ -376,6 +411,15 @@ function checkPoint(x1,y1,x2) {
         return true;
     }
     return false;
+}
+
+ function addPlayer(name) {
+    playerList.push(name);
+    let str = "";
+    playerList.forEach(p => {
+        str = str + "<span>" + p + "</span><br/>"
+    });
+    playerListElement.html(str);
 }
 
 function makeid(length) {

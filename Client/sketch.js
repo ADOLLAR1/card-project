@@ -9,12 +9,14 @@ let extendedActive = false;
 let card;
 let backg;
 let font;
+let playerListElement;
+let playerList = []; 
 
 let playerData = {};
 
 function preload() {
-    card = loadImage("Assets/card.png");
-    backg = loadImage("Assets/background.png");
+    card = loadImage("Assets/card2.png");
+    backg = loadImage("Assets/background2.png");
     font = loadFont("Assets/font.ttf");
     if (Math.floor(Math.random()*10) == 0) font = loadFont("Assets/font2.ttf");
 }
@@ -27,6 +29,7 @@ function setup() {
     }
     alert("If you ever get disconnected please use the following client key in the previous message box to reconnect to the game. (Failure to do this will result in server bugs which requires a game restart!)");
     alert("Client Key: " + key);
+    playerListElement = createElement("aside");
     extended = createButton("Extended Cards (false)");
     remove = createButton("Remove Cards (false)");
     button = createButton("Start");
@@ -68,7 +71,7 @@ function draw() {
     background(127);
     image(backg,0,0,800,800);
     textFont(font);
-    textSize(18);
+    textSize(24);
     drawCard(playerData.StockCard, createVector(700,600),100, "Stock Pile");
 
     drawCard(playerData.Discard1Card, createVector(200,600),100, "Discard Pile");
@@ -238,8 +241,16 @@ function mouseClicked() {
 function drawCard(cardText, pos, size, tooltip) {
     if (cardText != null && cardText != undefined && cardText != "") {
         if (typeof(cardText) !== "string") cardText = "ERROR";
-        cardText = cardText.replace(/~SB~/g, "");
-        cardText = cardText.replace(/~RC~/g, "");
+        let sb = false;
+        let rc = false
+        if (cardText.includes("~SB~")) {
+            sb = true
+            cardText = cardText.replace(/~SB~/g, "");
+        }
+        if (cardText.includes("~RC~")) {
+            rc = true
+            cardText = cardText.replace(/~RC~/g, "");
+        }
         textAlign(CENTER, CENTER);
         fill(0,0,0,0);
         stroke(0);
@@ -271,6 +282,26 @@ function drawCard(cardText, pos, size, tooltip) {
         translate(pos.x, pos.y);
         text("" + cardText + "",0,0,size,size*2);
         pop();
+        if (sb) {
+            fill(255,0,0);
+            textSize(16);
+            push();
+            translate(pos.x,pos.y);
+            textAlign(RIGHT, TOP);
+            text("SB", 0, 0, size, size*2);
+            pop();
+            textSize(24);
+        }
+        if (rc) {
+            fill(0,127,127);
+            textSize(16);
+            push();
+            translate(pos.x,pos.y);
+            textAlign(RIGHT, TOP);
+            text("RC", 0, 0, size, size*2);
+            pop();
+            textSize(24);
+        }
         fill(0);
         stroke(0,0,0,0);
         textAlign(LEFT, TOP);
@@ -326,6 +357,10 @@ function socketMessage(event) {
             if (command.type === "SET") {
                 data.return[command.name] = setValue(command.name, command.value);
             }
+            if (command.type === "ADD") {
+                addPlayer(command.value);
+                data.return[command.name] = "OK";
+            }
         });
         data.type = type;
         data.clientKey = key;
@@ -358,6 +393,21 @@ function setValue(key, value) {
             remove.hide();
             extended.hide();
         }
+    }
+    if (key === "playerList" || key === "selectedPlayer") {
+        let str = "";
+        let tmp = "";
+        playerData.playerList.forEach(p => {
+            if (playerData.selectedPlayer != null && playerData.selectedPlayer != undefined) {
+                if (p === playerData.selectedPlayer) {
+                    tmp = "<span style='color:#FF7F00;'>" +  "=> " + "</span>";
+                } else {
+                    tmp = "";
+                }
+            }
+            str = str + "<span>" + tmp + p + "</span><hr/>"
+        });
+        playerListElement.html(str);
     }
 
     return value;
