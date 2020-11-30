@@ -16,8 +16,8 @@ let scaleFactor = 1;
 let playerData = {};
 
 function preload() {
-    card = loadImage("Assets/card.png");
-    backg = loadImage("Assets/background.png");
+    card = loadImage("Assets/card2.png");
+    backg = loadImage("Assets/background2.png");
     font = loadFont("Assets/font.ttf");
     if (Math.floor(Math.random()*10) == 0) font = loadFont("Assets/font2.ttf");
 }
