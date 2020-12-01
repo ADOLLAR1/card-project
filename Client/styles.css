@@ -1,0 +1,15 @@
+body {
+    padding: 0;
+    margin: 0;
+}
+main {
+    float: left;
+    display: block;
+}
+aside {
+    position: absolute;
+    top: 0;
+    right: 0;
+    float: right;
+    width: 20%;
+}
