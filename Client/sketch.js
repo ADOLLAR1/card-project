@@ -45,13 +45,16 @@ let themedata = {
     'SB': [255,0,0],
     'RC': [0,127,127],
     'Cannot Discard': [255,127,127],
-    'Can Discard': [127,255,127]
+    'Can Discard': [127,255,127],
+    'BORDER': [0,0,0],
+    'WARN1': "blue",
+    'WARN2': "red"
 };
 
 function preload() {
-    theme = prompt("Please enter a theme name: (Valid theme names are: 'Default' 'Thanksgiving' 'Winter' 'Christmas')");
+    theme = prompt("Please enter a theme name: (Valid theme names are: 'Default' 'Thanksgiving' 'Winter' 'Christmas' 'Computer')");
     while (theme == null || theme == undefined || theme === "") {
-        theme = prompt("Please enter a theme name: (Valid theme names are: 'Default' 'Thanksgiving' 'Winter' 'Christmas')");
+        theme = prompt("Please enter a theme name: (Valid theme names are: 'Default' 'Thanksgiving' 'Winter' 'Christmas' 'Computer')");
     }
     path = path + theme + "/";
     card = loadImage(path + "card.png");
@@ -302,9 +305,10 @@ function drawCard(cardText, pos, size, tooltip) {
         }
         textAlign(CENTER, CENTER);
         fill(0,0,0,0);
-        stroke(0);
+        stroke(themedata["BORDER"]);
         image(card,pos.x,pos.y,size,size*2)
         rect(pos.x,pos.y,size,size*2, 5, 5, 5, 5);
+        stroke(0,0,0,0);
         if (themedata[cardText] != null && themedata[cardText] != undefined) {
             fill(themedata[cardText]);
         } else {
@@ -339,9 +343,10 @@ function drawCard(cardText, pos, size, tooltip) {
         textAlign(LEFT, TOP);
     } else {
         fill(0,0,0,0);
-        stroke(0);
+        stroke(themedata["BORDER"]);
         rect(pos.x, pos.y, size,size*2, 5, 5, 5, 5);
-        fill(0);
+        fill(themedata["BORDER"]);
+        stroke(0,0,0,0);
         textAlign(CENTER, CENTER);
         text(tooltip,pos.x,pos.y,size,size*2);
         stroke(0,0,0,0);
@@ -452,9 +457,9 @@ function setValue(key, value) {
                 };
             }
             if (playerData.otherCards[p].StockAmount <= 5) {
-                tmp2 = "<span style='color:red; font-family: " + (theme + "-theme") + ";'>" + playerData.otherCards[p]["StockCard"] + "</span>";
+                tmp2 = "<span style='color:" + themedata["WARN2"] + "; font-family: " + (theme + "-theme") + ";'>" + playerData.otherCards[p]["StockCard"] + "</span>";
             } else if (playerData.otherCards[p].StockAmount <= 5) {
-                tmp2 = "<span style='color:blue; font-family: " + (theme + "-theme") + ";'>" + playerData.otherCards[p]["StockCard"] + "</span>";
+                tmp2 = "<span style='color:" + themedata["WARN1"] + "; font-family: " + (theme + "-theme") + ";'>" + playerData.otherCards[p]["StockCard"] + "</span>";
             } else {
                 tmp2 = "<span style='font-family: " + (theme + "-theme") + ";'>" + playerData.otherCards[p]["StockCard"] + "</span>";
             }

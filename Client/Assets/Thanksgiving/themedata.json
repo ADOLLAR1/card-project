@@ -27,5 +27,8 @@
     "SB": [63,0,0],
     "RC": [0,63,0],
     "Cannot Discard": [127,63,0],
-    "Can Discard": [63,127,0]
+    "Can Discard": [63,127,0],
+    "BORDER": [0,0,0],
+    "WARN1": "red",
+    "WARN2": "green"
 }

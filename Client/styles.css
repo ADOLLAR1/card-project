@@ -33,3 +33,8 @@ aside {
     font-family: Christmas-theme;
     src: url(Assets/Christmas/font.ttf);
 }
+
+@font-face {
+    font-family: Computer-theme;
+    src: url(Assets/Computer/font.ttf);
+}

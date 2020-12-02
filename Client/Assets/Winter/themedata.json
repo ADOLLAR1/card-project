@@ -27,5 +27,8 @@
     "SB": [127,127,127],
     "RC": [0,127,127],
     "Cannot Discard": [255,127,127],
-    "Can Discard": [127,255,127]
+    "Can Discard": [127,255,127],
+    "BORDER": [0,0,0],
+    "WARN1": "red",
+    "WARN2": "blue"
 }
