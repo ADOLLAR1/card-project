@@ -9,16 +9,52 @@ let extendedActive = false;
 let card;
 let backg;
 let font;
+let theme;
+let path = "Assets/";
 let playerListElement;
 let playerList = [];
-let scaleFactor = 1;
 
 let playerData = {};
 
+let themedata = {
+    '0': [0,0,255],
+    '1': [0,0,255],
+    '2': [0,0,255],
+    '3': [0,0,255],
+    '4': [0,0,255],
+    '5': [0,255,0],
+    '6': [0,255,0],
+    '7': [0,255,0],
+    '8': [0,255,0],
+    '9': [255,127,0],
+    '10': [255,127,0],
+    '11': [255,127,0],
+    '12': [255,127,0],
+    '13': [0,255,255],
+    '14': [0,255,255],
+    '15': [0,255,255],
+    '16': [0,255,255],
+    '17': [127,0,255],
+    '18': [127,0,255],
+    '19': [127,0,255],
+    '20': [127,0,255],
+    '21': [0,0,0],
+    '22': [0,0,0],
+    '23': [0,0,0],
+    '24': [0,0,0],
+    'SB': [255,0,0],
+    'RC': [0,127,127]
+};
+
 function preload() {
-    card = loadImage("Assets/card2.png");
-    backg = loadImage("Assets/background2.png");
-    font = loadFont("Assets/font.ttf");
+    theme = prompt("Please enter a theme name: (Valid theme names are: 'Default' 'Thanksgiving' 'Winter' 'Christmas')");
+    while (theme == null || theme == undefined || theme === "") {
+        theme = prompt("Please enter a theme name: (Valid theme names are: 'Default' 'Thanksgiving' 'Winter' 'Christmas')");
+    }
+    path = path + theme + "/";
+    card = loadImage(path + "card.png");
+    backg = loadImage(path + "background.png");
+    font = loadFont(path + "font.ttf");
     if (Math.floor(Math.random()*10) == 0) font = loadFont("Assets/font2.ttf");
 }
 
@@ -34,7 +70,7 @@ function setup() {
     if (scale == null || scale == undefined || scale === "") {
         scaleFactor = 1;
     } else {
-        scaleFactor = parseInt(scale);
+        scaleFactor = parseFloat(scale);
     }
     playerListElement = createElement("aside");
     extended = createButton("Extended Cards (false)");
@@ -44,6 +80,10 @@ function setup() {
     extended.hide();
     remove.hide();
     button.hide();
+
+    readTextFile(path + "themedata.json", function(text) {
+        themedata = JSON.parse(text);
+    });
 
     createCanvas(800/scaleFactor,800/scaleFactor);
     createWSConnection();
@@ -76,7 +116,7 @@ function setup() {
 
 function draw() {
     background(127);
-    image(backg,0,0,800,800);
+    image(backg,0,0,800/scaleFactor,800/scaleFactor);
     textFont(font);
     textSize(24);
     drawCard(playerData.StockCard, createVector(700/scaleFactor,600/scaleFactor),100/scaleFactor, "Stock Pile");
@@ -101,11 +141,11 @@ function draw() {
 }
 
 function mouseClicked() { 
-    if (checkPoint(700,600,100)) {
+    if (checkPoint(700/scaleFactor,600/scaleFactor,100/scaleFactor)) {
         setValue("Selected", "StockCard");
     }
 
-    if (checkPoint(200,600,100)) {
+    if (checkPoint(200/scaleFactor,600/scaleFactor,100/scaleFactor)) {
         if (getValue("Discard") === "Cannot Discard") {
             setValue("Selected", "Discard1Card");
         } else {
@@ -120,7 +160,7 @@ function mouseClicked() {
             setValue("Selected", undefined);
         }
     }
-    if (checkPoint(300,600,100)) {
+    if (checkPoint(300/scaleFactor,600/scaleFactor,100/scaleFactor)) {
         if (getValue("Discard") === "Cannot Discard") {
             setValue("Selected", "Discard2Card");
         } else {
@@ -135,7 +175,7 @@ function mouseClicked() {
             setValue("Selected", undefined);
         }
     }
-    if (checkPoint(400,600,100)) {
+    if (checkPoint(400/scaleFactor,600/scaleFactor,100/scaleFactor)) {
         if (getValue("Discard") === "Cannot Discard") {
             setValue("Selected", "Discard3Card");
         } else {
@@ -150,7 +190,7 @@ function mouseClicked() {
             setValue("Selected", undefined);
         }
     }
-    if (checkPoint(500,600,100)) {
+    if (checkPoint(500/scaleFactor,600/scaleFactor,100/scaleFactor)) {
         if (getValue("Discard") === "Cannot Discard") {
             setValue("Selected", "Discard4Card");
         } else {
@@ -166,23 +206,23 @@ function mouseClicked() {
         }
     }
 
-    if (checkPoint(150,300,100)) {
+    if (checkPoint(150/scaleFactor,300/scaleFactor,100/scaleFactor)) {
         setValue("Selected", "Hand1Card");
     }
-    if (checkPoint(250,300,100)) {
+    if (checkPoint(250/scaleFactor,300/scaleFactor,100/scaleFactor)) {
         setValue("Selected", "Hand2Card");
     }
-    if (checkPoint(350,300,100)) {
+    if (checkPoint(350/scaleFactor,300/scaleFactor,100/scaleFactor)) {
         setValue("Selected", "Hand3Card");
     }
-    if (checkPoint(450,300,100)) {
+    if (checkPoint(450/scaleFactor,300/scaleFactor,100/scaleFactor)) {
         setValue("Selected", "Hand4Card");
     }
-    if (checkPoint(550,300,100)) {
+    if (checkPoint(550/scaleFactor,300/scaleFactor,100/scaleFactor)) {
         setValue("Selected", "Hand5Card");
     }
 
-    if (checkPoint(200,0,100)) {
+    if (checkPoint(200/scaleFactor,0/scaleFactor,100/scaleFactor)) {
         if (getValue("Selected") != null && getValue("Selected") != undefined) {
             socket.send(JSON.stringify({
                 type: "PLACE",
@@ -195,7 +235,7 @@ function mouseClicked() {
             setValue("Selected", undefined);
         }
     }
-    if (checkPoint(300,0,100)) {
+    if (checkPoint(300/scaleFactor,0/scaleFactor,100/scaleFactor)) {
         if (getValue("Selected") != null && getValue("Selected") != undefined) {
             socket.send(JSON.stringify({
                 type: "PLACE",
@@ -208,7 +248,7 @@ function mouseClicked() {
             setValue("Selected", undefined);
         }
     }
-    if (checkPoint(400,0,100)) {
+    if (checkPoint(400/scaleFactor,0/scaleFactor,100/scaleFactor)) {
         if (getValue("Selected") != null && getValue("Selected") != undefined) {
             socket.send(JSON.stringify({
                 type: "PLACE",
@@ -221,7 +261,7 @@ function mouseClicked() {
             setValue("Selected", undefined);
         }
     }
-    if (checkPoint(500,0,100)) {
+    if (checkPoint(500/scaleFactor,0/scaleFactor,100/scaleFactor)) {
         if (getValue("Selected") != null && getValue("Selected") != undefined) {
             socket.send(JSON.stringify({
                 type: "PLACE",
@@ -235,7 +275,7 @@ function mouseClicked() {
         }
     }
 
-    if (checkPoint(0,600,100)) {
+    if (checkPoint(0/scaleFactor,600/scaleFactor,100/scaleFactor)) {
         if(getValue("Discard") === "Cannot Discard") {
             setValue("Discard", "Can Discard");
         } else {
@@ -263,34 +303,17 @@ function drawCard(cardText, pos, size, tooltip) {
         stroke(0);
         image(card,pos.x,pos.y,size,size*2)
         rect(pos.x,pos.y,size,size*2, 5, 5, 5, 5);
-        if (cardText === "0" || cardText === "1" || cardText === "2" || cardText === "3" || cardText === "4") {
-            fill(0,0,255);
-        } else if (cardText === "5" || cardText === "6" || cardText === "7" || cardText === "8") {
-            fill(0,255,0);
-        } else if (cardText === "9" || cardText === "10" || cardText === "11" || cardText === "12") {
-            fill(255,127,0);
-        } else if (cardText === "13" || cardText === "14" || cardText === "15" || cardText === "16") {
-            fill(0,255,255);
-        } else if (cardText === "17" || cardText === "18" || cardText === "19" || cardText === "20") {
-            fill(127,0,255);
-        } else if (cardText === "21" || cardText === "22" || cardText === "23" || cardText === "24") {
-            fill(0,0,0);
-        } else if (cardText === "RC") {
-            fill(0,127,127);
+        if (themedata[cardText] != null && themedata[cardText] != undefined) {
+            fill(themedata[cardText]);
         } else {
-            fill(255,0,0);
-        }
-        if (cardText === "Cannot Discard") {
-            fill(255,127,127);
-        } else if (cardText === "Can Discard") {
-            fill(127,255,127);
+            fill([255,0,0]);
         }
         push();
         translate(pos.x, pos.y);
         text("" + cardText + "",0,0,size,size*2);
         pop();
         if (sb) {
-            fill(255,0,0);
+            fill(themedata["SB"]);
             textSize(16);
             push();
             translate(pos.x,pos.y);
@@ -300,7 +323,7 @@ function drawCard(cardText, pos, size, tooltip) {
             textSize(24);
         }
         if (rc) {
-            fill(0,127,127);
+            fill(themedata["RC"]);
             textSize(16);
             push();
             translate(pos.x,pos.y);
@@ -429,11 +452,13 @@ function setValue(key, value) {
             if(playerData.otherCards[p] == null || playerData.otherCards[p] == undefined) {
                 playerData.otherCards[p] = {
                     "StockCard": " ",
-                    "stockLength": 0
+                    "StockAmount": 0
                 };
             }
-            if (playerData.otherCards[p].stockLength <= 5) {
+            if (playerData.otherCards[p].StockAmount <= 5) {
                 tmp2 = "<span style='color:red;'>" + playerData.otherCards[p]["StockCard"] + "</span>";
+            } else if (playerData.otherCards[p].StockAmount <= 5) {
+                tmp2 = "<span style='color:blue;'>" + playerData.otherCards[p]["StockCard"] + "</span>";
             } else {
                 tmp2 = "<span>" + playerData.otherCards[p]["StockCard"] + "</span>";
             }
@@ -504,4 +529,16 @@ function takeTurn() {
             }
         }));
     });
+}
+
+function readTextFile(file, callback) {
+    var rawFile = new XMLHttpRequest();
+    rawFile.overrideMimeType("application/json");
+    rawFile.open("GET", file, true);
+    rawFile.onreadystatechange = function() {
+        if (rawFile.readyState === 4 && rawFile.status == "200") {
+            callback(rawFile.responseText);
+        }
+    }
+    rawFile.send(null);
 }
