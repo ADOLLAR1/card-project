@@ -456,11 +456,11 @@ function setValue(key, value) {
                 };
             }
             if (playerData.otherCards[p].StockAmount <= 5) {
-                tmp2 = "<span style='color:red;'>" + playerData.otherCards[p]["StockCard"] + "</span>";
+                tmp2 = "<span style='color:red; font-family: " + (theme + "-theme") + ";'>" + playerData.otherCards[p]["StockCard"] + "</span>";
             } else if (playerData.otherCards[p].StockAmount <= 5) {
-                tmp2 = "<span style='color:blue;'>" + playerData.otherCards[p]["StockCard"] + "</span>";
+                tmp2 = "<span style='color:blue; font-family: " + (theme + "-theme") + ";'>" + playerData.otherCards[p]["StockCard"] + "</span>";
             } else {
-                tmp2 = "<span>" + playerData.otherCards[p]["StockCard"] + "</span>";
+                tmp2 = "<span style='font-family: " + (theme + "-theme") + ";'>" + playerData.otherCards[p]["StockCard"] + "</span>";
             }
 
             str = str + "<span>" + tmp + p + " [" + tmp2 + "]" +  "</span><hr/>"

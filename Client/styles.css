@@ -13,3 +13,23 @@ aside {
     float: right;
     width: 20%;
 }
+
+@font-face {
+    font-family: Default-theme;
+    src: url(Assets/Default/font.ttf);
+}
+
+@font-face {
+    font-family: Thanksgiving-theme;
+    src: url(Assets/Thanksgiving/font.ttf);
+}
+
+@font-face {
+    font-family: Winter-theme;
+    src: url(Assets/Winter/font.ttf);
+}
+
+@font-face {
+    font-family: Christmas-theme;
+    src: url(Assets/Christmas/font.ttf);
+}
