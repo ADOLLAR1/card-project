@@ -1,5 +1,3 @@
-const { strict } = require('assert');
-const { emitKeypressEvents } = require('readline');
 const WebSocket = require('ws');
 const server = new WebSocket.Server({
     port: 15000
@@ -173,6 +171,12 @@ let authData = {};
 /*
     Server Handling
 */
+
+server.on('timeout', function(timedOutSocket) {
+    console.log("TIME OUT");
+    timedOutSocket.write('socket timed out!');
+    timedOutSocket.end();
+  });
 
 server.on('connection', function(socket) {
     sockets.push(socket);

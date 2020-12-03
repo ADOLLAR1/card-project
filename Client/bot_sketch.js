@@ -46,7 +46,8 @@ let themedata = {
     'RC': [0,127,127],
     'BORDER': [0,0,0],
     'WARN1': "blue",
-    'WARN2': "red"
+    'WARN2': "red",
+    "EFFECT": "NONE"
 };
 
 function preload() {
@@ -59,6 +60,7 @@ function preload() {
     backg = loadImage(path + "background.png");
     font = loadFont(path + "font.ttf");
     if (Math.floor(Math.random()*10) == 0) font = loadFont("Assets/font2.ttf");
+    effectPreinit();
 }
 
 function setup() {
@@ -120,6 +122,13 @@ function setup() {
 function draw() {
     background(127);
     image(backg,0,0,800/scaleFactor,800/scaleFactor);
+
+    if (themedata["EFFECT"] === "magic") {
+        magicEffectDraw();
+    } else if (themedata["EFFECT"] === "snow") {
+        snowEffectDraw();
+    }
+
     textFont(font);
     textSize(24);
     drawCard(playerData.StockCard, createVector(700/scaleFactor,600/scaleFactor),100/scaleFactor, "Stock Pile");
@@ -546,4 +555,32 @@ function readTextFile(file, callback) {
         }
     }
     rawFile.send(null);
+}
+
+
+function clamp(x, a, b) {
+    if (x > b) return b;
+    if (x < a) return a;
+    return x;
+}
+
+//START OF EFFECTS
+
+let magicMap;
+let snowMap;
+
+function effectPreinit() {
+    magicMap = loadImage("Assets/EFFECTS/magic/map.png");
+    snowMap = loadImage("Assets/EFFECTS/snow/map.png");
+}
+
+function magicEffectDraw() {
+    let tmp = frameCount%(800/scaleFactor);
+    image(magicMap, 0, 0, 800/scaleFactor, 800/scaleFactor, tmp+800+-clamp(mouseX,0,800), tmp+800+-clamp(mouseY,0,800), 800/scaleFactor, 800/scaleFactor);
+}
+
+function snowEffectDraw() {
+    let tmp = frameCount%(800/scaleFactor);
+    tmp = (800/scaleFactor)-tmp
+    image(snowMap, 0, 0, 800/scaleFactor, 800/scaleFactor, tmp+800+-clamp(mouseX,0,800), tmp+800+-clamp(mouseY,0,800), 800/scaleFactor, 800/scaleFactor);
 }
