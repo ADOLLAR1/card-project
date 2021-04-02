@@ -1,4 +1,4 @@
-const WSURL = "ws://127.0.0.1:15000";
+let WSURL = "ws://127.0.0.1:15000";
 let socket;
 let key;
 let remove;
@@ -52,10 +52,19 @@ let themedata = {
     "EFFECT": "NONE"
 };
 
+
+/**
+ * p5 Function
+ */
 function preload() {
-    theme = prompt("Please enter a theme name: (Valid theme names are: 'Default' 'Thanksgiving' 'Winter' 'Christmas' 'Computer')");
+
+    if (local) {
+        WSURL = "ws://192.168.1.207:15000";
+    }
+
+    theme = prompt("Please enter a theme name: (Valid theme names are: 'Default' 'Thanksgiving' 'Winter' 'Christmas' 'Computer' 'Alternate' 'Easter')");
     while (theme == null || theme == undefined || theme === "") {
-        theme = prompt("Please enter a theme name: (Valid theme names are: 'Default' 'Thanksgiving' 'Winter' 'Christmas' 'Computer')");
+        theme = prompt("Please enter a theme name: (Valid theme names are: 'Default' 'Thanksgiving' 'Winter' 'Christmas' 'Computer' 'Alternate' 'Easter')");
     }
     path = path + theme + "/";
     card = loadImage(path + "card.png");
@@ -65,6 +74,10 @@ function preload() {
     effectPreinit();
 }
 
+
+/**
+ * p5 Function
+ */
 function setup() {
     angleMode(DEGREES);
     key = prompt("Do you have a client key? (Only use if you got disconnected)");
@@ -121,6 +134,10 @@ function setup() {
     });
 }
 
+
+/**
+ * p5 Function
+ */
 function draw() {
     background(127);
     image(backg,0,0,800/scaleFactor,800/scaleFactor);
@@ -154,6 +171,10 @@ function draw() {
     drawCard(playerData.Discard, createVector(0/scaleFactor,600/scaleFactor), 100/scaleFactor, "You should not see this!");
 }
 
+
+/**
+ * p5 Function
+ */
 function mouseClicked() { 
     if (checkPoint(700/scaleFactor,600/scaleFactor,100/scaleFactor)) {
         setValue("Selected", "StockCard");
@@ -299,6 +320,14 @@ function mouseClicked() {
 
 }
 
+
+/**
+ * Function to draw a card
+ * @param {string} cardText 
+ * @param {pVector} pos 
+ * @param {pVector} size 
+ * @param {string} tooltip 
+ */
 function drawCard(cardText, pos, size, tooltip) {
     if (cardText != null && cardText != undefined && cardText != "") {
         if (typeof(cardText) !== "string") cardText = "ERROR";
@@ -362,6 +391,10 @@ function drawCard(cardText, pos, size, tooltip) {
     }
 }
 
+
+/**
+ * Function that created the WS connect to the server
+ */
 function createWSConnection() {
     socket = new WebSocket(WSURL);
     socket.addEventListener('open', socketOpen);
@@ -370,22 +403,41 @@ function createWSConnection() {
     socket.addEventListener('message', socketMessage);
 }
 
-function socketOpen(event) {
+/**
+ * Socket open event
+ * @param {*} event 
+ */
+ function socketOpen(event) {
     /*let data = {
         type: "OPEN"
     }
     socket.send(JSON.stringify(data));*/
 }
 
+
+/**
+ * Socket close event
+ * @param {*} event 
+ */
 function socketClose(event) {
-    console.log(event);
     createWSConnection();
 }
 
+
+/**
+ * Socket error event
+ * @param {*} event 
+ */
 function socketError(event) {
-    console.log(event);
+
 }
 
+
+/**
+ * Socket message event
+ * @param {*} event 
+ * @returns {void}
+ */
 function socketMessage(event) {
     let object = JSON.parse(event.data);
     if (object.clientKey != null && object.clientKey != undefined && object.clientKey != key) {
@@ -415,11 +467,22 @@ function socketMessage(event) {
     }
 }
 
+/**
+ * Function to display and Alert box
+ * @param {string} info 
+ * @returns {null}
+ */
 function infoMessage(info) {
     alert(info);
     return null;
 }
 
+
+/**
+ * Function to get user input from a prompt 
+ * @param {string} info 
+ * @returns {string} value
+ */
 function infoPrompt(info) {
     let value;  
     while (value == null || value == undefined) {
@@ -428,6 +491,13 @@ function infoPrompt(info) {
     return value
 }
 
+
+/**
+ * Funcion to set player data value
+ * @param {string} key 
+ * @param {*} value 
+ * @returns {*} value
+ */
 function setValue(key, value) {
     console.log("Setting: '" + key + "' to: '" + value + "'!");
     playerData[key] = value;
@@ -468,7 +538,7 @@ function setValue(key, value) {
             }
             if (playerData.otherCards[p].StockAmount <= 5) {
                 tmp2 = "<span style='color:" + themedata["WARN2"] + "; font-family: " + (theme + "-theme") + ";'>" + playerData.otherCards[p]["StockCard"] + "</span>";
-            } else if (playerData.otherCards[p].StockAmount <= 5) {
+            } else if (playerData.otherCards[p].StockAmount <= 10) {
                 tmp2 = "<span style='color:" + themedata["WARN1"] + "; font-family: " + (theme + "-theme") + ";'>" + playerData.otherCards[p]["StockCard"] + "</span>";
             } else {
                 tmp2 = "<span style='font-family: " + (theme + "-theme") + ";'>" + playerData.otherCards[p]["StockCard"] + "</span>";
@@ -482,10 +552,24 @@ function setValue(key, value) {
     return value;
 }
 
+
+/**
+ * Function to get a player data value
+ * @param {string} key 
+ * @returns {*} value
+ */
 function getValue(key) {
     return playerData[key];
 }
 
+
+/**
+ * Fuinction to tell if mouse is in a card
+ * @param {number} x1 
+ * @param {number} y1 
+ * @param {number} x2 card width
+ * @returns {boolean}
+ */
 function checkPoint(x1,y1,x2) {
     let y2 = x2*2;
     if (mouseX >= x1 && mouseY >= y1 && mouseX <= x1+x2 && mouseY <= y1+y2) {
@@ -494,6 +578,12 @@ function checkPoint(x1,y1,x2) {
     return false;
 }
 
+
+/**
+ * Function to make a player id/key
+ * @param {number} length 
+ * @returns {string} key
+ */
 function makeid(length) {
     var result           = '';
     var characters       = 'BCDFGHJKLMNPQRSTVWXZbcdfghjklmnpqrstvwxz0123456789';  //Removed some letters to make sure no words can be made!
@@ -504,6 +594,12 @@ function makeid(length) {
     return result;
 }
 
+
+/**
+ * Funcion to rread a text file
+ * @param {string} file 
+ * @param {function} callback 
+ */
 function readTextFile(file, callback) {
     var rawFile = new XMLHttpRequest();
     rawFile.overrideMimeType("application/json");
@@ -517,6 +613,13 @@ function readTextFile(file, callback) {
 }
 
 
+/**
+ * Function to clamp a number
+ * @param {number} x 
+ * @param {number} a 
+ * @param {number} b 
+ * @returns {number} x (clamped)
+ */
 function clamp(x, a, b) {
     if (x > b) return b;
     if (x < a) return a;
@@ -528,18 +631,30 @@ function clamp(x, a, b) {
 let magicMap;
 let snowMap;
 
+
+/**
+ * Function to load some assets
+ */
 function effectPreinit() {
     magicMap = loadImage("Assets/EFFECTS/magic/map.png");
     snowMap = loadImage("Assets/EFFECTS/snow/map.png");
 }
 
+
+/**
+ * Function to draw magic effect
+ */
 function magicEffectDraw() {
     let tmp = frameCount%(800/scaleFactor);
     image(magicMap, 0, 0, 800/scaleFactor, 800/scaleFactor, tmp+800+-clamp(mouseX,0,800), tmp+800+-clamp(mouseY,0,800), 800/scaleFactor, 800/scaleFactor);
 }
 
+
+/**
+ * Function to draw snow effect
+ */
 function snowEffectDraw() {
     let tmp = frameCount%(800/scaleFactor);
     tmp = (800/scaleFactor)-tmp
-    image(snowMap, 0, 0, 800/scaleFactor, 800/scaleFactor, tmp+800+-clamp(mouseX,0,800), tmp+800+-clamp(mouseY,0,800), 800/scaleFactor, 800/scaleFactor);
+    image(snowMap, 0, 0, 800/scaleFactor, 800/scaleFactor, tmp+800, tmp+800, 800/scaleFactor, 800/scaleFactor);
 }

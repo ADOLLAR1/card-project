@@ -38,3 +38,13 @@ aside {
     font-family: Computer-theme;
     src: url(Assets/Computer/font.ttf);
 }
+
+@font-face {
+    font-family: Alternate-theme;
+    src: url(Assets/Alternate/font.ttf);
+}
+
+@font-face {
+    font-family: TEST-theme;
+    src: url(Assets/TEST/font.ttf);
+}

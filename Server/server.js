@@ -901,6 +901,13 @@ server.on('connection', function(socket) {
 });
 
 
+
+/**
+ * Function to create a player data object
+ * @param {string} name 
+ * @param {boolean} host 
+ * @returns {object}
+ */
 function createPlayerData(name, host) {
     return {
         name: name,
@@ -914,6 +921,12 @@ function createPlayerData(name, host) {
     }
 }
 
+
+/**
+ * Function to suffle an array
+ * @param {array} array 
+ * @returns {array} array
+ */
 function shuffle(array) {
     var currentIndex = array.length, temporaryValue, randomIndex;
 
@@ -933,10 +946,22 @@ function shuffle(array) {
     return array;
 }
 
+
+/**
+ * Function to push a card to a deck
+ * @param {array} deck 
+ * @param {string} card 
+ */
 function pushCard(deck, card) {
     deck.push(card);
 }
 
+
+/**
+ * function to pop a card off a deck
+ * @param {array} deck 
+ * @returns {string} card
+ */
 function popCard(deck) {
 
     if (deck.length >= 1) {
@@ -946,6 +971,12 @@ function popCard(deck) {
     return null;
 }
 
+
+/**
+ * Function to get the top card value from a deck without removing the card from it
+ * @param {array} deck 
+ * @returns {string} card
+ */
 function getTopCard(deck) {
     if (deck.length >= 1) {
         let card = deck[deck.length-1];
@@ -954,6 +985,13 @@ function getTopCard(deck) {
     return null;
 }
 
+
+/**
+ * Functionm to get many cards from a deck at once
+ * @param {array} deck 
+ * @param {number} amount 
+ * @returns {array} cards
+ */
 function popMultCard(deck, amount) {
     if (deck.length >= amount) {
         let card = deck.splice(deck.length-amount-1, amount);
@@ -963,6 +1001,13 @@ function popMultCard(deck, amount) {
     }
 }
 
+
+/**
+ * Function to translate a name used by the client into the field the server is requesting
+ * @param {string} name 
+ * @param {string} socket (key)
+ * @returns {*} serverdata
+ */
 function translateDeckName(name, socket) {
     if (name === "Discard1Card") {
         return playerData[socket].discard_pile_1;
@@ -995,6 +1040,13 @@ function translateDeckName(name, socket) {
     }
 }
 
+
+/**
+ * Function used to pop a card from a players hand
+ * @param {string} name 
+ * @param {string} socket (key)
+ * @returns {string} card
+ */
 function popHandCard(name, socket) {
     if (name === "Hand1Card") {
         let card = playerData[socket].hand[0];
@@ -1019,6 +1071,13 @@ function popHandCard(name, socket) {
     }
 }
 
+
+/**
+ * Function to set a hand card
+ * @param {string} name 
+ * @param {string} socket (key)
+ * @param {string} value 
+ */
 function setHandCard(name, socket, value) {
     if (name === "Hand1Card") {
         playerData[socket].hand[0] = value;
@@ -1033,6 +1092,13 @@ function setHandCard(name, socket, value) {
     }
 }
 
+
+/**
+ * Function to check if a card can be placed on a deck
+ * @param {array} deck 
+ * @param {string} card 
+ * @returns {boolean}
+ */
 function CheckCardPlacement(deck, card) {
     let top_card = getTopCard(deck);
     if (card != undefined && card != null && card.includes("~RC~")) return true;
@@ -1049,6 +1115,10 @@ function CheckCardPlacement(deck, card) {
     return false;
 }
 
+
+/**
+ * Function to reorder cards. his was added to prevent errors
+ */
 function FixDrawPile() {
     if (true) {
         console.log("Draw Pile Empty");
@@ -1141,6 +1211,10 @@ function FixDrawPile() {
     }
 }
 
+
+/**
+ * This function counts all the cards in all the decks. It was used for debuging
+ */
 function countCards() {
     let count = 0;
     count = count + draw_pile.length;
