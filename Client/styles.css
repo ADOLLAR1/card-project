@@ -48,3 +48,8 @@ aside {
     font-family: TEST-theme;
     src: url(Assets/TEST/font.ttf);
 }
+
+@font-face {
+    font-family: Easter-theme;
+    src: url(Assets/Easter/font.ttf);
+}
