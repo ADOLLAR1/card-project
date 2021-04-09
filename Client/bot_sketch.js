@@ -57,7 +57,7 @@ let themedata = {
 function preload() {
 
     if (local) {
-        WSURL = "ws://192.168.1.207:15000";
+        WSURL = "ws://127.0.0.1:15000";
     }
 
     theme = prompt("Please enter a theme name: (Valid theme names are: 'Default' 'Thanksgiving' 'Winter' 'Christmas' 'Computer' 'Alternate' 'Easter')");

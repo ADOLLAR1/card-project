@@ -1,0 +1,21 @@
+15min Total
+
+First 5 Min
+
+Talk about the project and why I made it
+    Why did I want to make it
+    Why did I not just find one already made
+    Why did I code it (and in what language) they way I did
+
+Second 5 Min
+
+Talk about what I had to learn
+    First time using web sockets
+    First time reading external JSON Files (From Client)
+
+Last 5min
+
+Talk about what I would do differently / what did I learn
+    I would use oop code
+    Use more/better libraries
+    Would I make it again?
