@@ -175,6 +175,8 @@ let authData = {};
     Server Handling
 */
 
+console.log("STARTING SREVER...");
+
 server.on('timeout', function(timedOutSocket) {
     console.log("TIME OUT");
     timedOutSocket.write('socket timed out!');
@@ -938,6 +940,8 @@ server.on('connection', function(socket) {
     });
 });
 
+console.log("SERVER STARTED!");
+
 
 
 /**
@@ -1326,3 +1330,5 @@ rl.on('SIGINT', () => {
 rl.on('SIGTSTP', () => {
     console.log("[33mThis program may not be moved to the background while the command injector is running![0m");
 });
+
+console.log("COMMAND INJECTOR STARTED!");
