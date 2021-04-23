@@ -4,8 +4,10 @@ let key;
 let remove;
 let extended;
 let button;
+let magic;
 let removeActive = false;
 let extendedActive = false;
+let magicActive = false;
 let card;
 let backg;
 let font;
@@ -17,34 +19,35 @@ let playerList = [];
 let playerData = {};
 
 let themedata = {
-    '0': [0,0,255],
-    '1': [0,0,255],
-    '2': [0,0,255],
-    '3': [0,0,255],
-    '4': [0,0,255],
-    '5': [0,255,0],
-    '6': [0,255,0],
-    '7': [0,255,0],
-    '8': [0,255,0],
-    '9': [255,127,0],
-    '10': [255,127,0],
-    '11': [255,127,0],
-    '12': [255,127,0],
-    '13': [0,255,255],
-    '14': [0,255,255],
-    '15': [0,255,255],
-    '16': [0,255,255],
-    '17': [127,0,255],
-    '18': [127,0,255],
-    '19': [127,0,255],
-    '20': [127,0,255],
-    '21': [0,0,0],
-    '22': [0,0,0],
-    '23': [0,0,0],
-    '24': [0,0,0],
-    'SB': [255,0,0],
-    'RC': [0,127,127],
-    'BORDER': [0,0,0],
+    '0': [0, 0, 255],
+    '1': [0, 0, 255],
+    '2': [0, 0, 255],
+    '3': [0, 0, 255],
+    '4': [0, 0, 255],
+    '5': [0, 255, 0],
+    '6': [0, 255, 0],
+    '7': [0, 255, 0],
+    '8': [0, 255, 0],
+    '9': [255, 127, 0],
+    '10': [255, 127, 0],
+    '11': [255, 127, 0],
+    '12': [255, 127, 0],
+    '13': [0, 255, 255],
+    '14': [0, 255, 255],
+    '15': [0, 255, 255],
+    '16': [0, 255, 255],
+    '17': [127, 0, 255],
+    '18': [127, 0, 255],
+    '19': [127, 0, 255],
+    '20': [127, 0, 255],
+    '21': [0, 0, 0],
+    '22': [0, 0, 0],
+    '23': [0, 0, 0],
+    '24': [0, 0, 0],
+    'SB': [255, 0, 0],
+    'RC': [0, 127, 127],
+    'MC': [0, 0, 0],
+    'BORDER': [0, 0, 0],
     'WARN1': "blue",
     'WARN2': "red",
     "EFFECT": "NONE"
@@ -68,7 +71,7 @@ function preload() {
     card = loadImage(path + "card.png");
     backg = loadImage(path + "background.png");
     font = loadFont(path + "font.ttf");
-    if (Math.floor(Math.random()*10) == 0) font = loadFont("Assets/font2.ttf");
+    if (Math.floor(Math.random() * 10) == 0) font = loadFont("Assets/font2.ttf");
     effectPreinit();
 }
 
@@ -90,23 +93,23 @@ function setup() {
     } else {
         scaleFactor = parseFloat(scale);
     }
-
-    createWSConnection();
-
     playerListElement = createElement("aside");
     extended = createButton("Extended Cards (false)");
     remove = createButton("Remove Cards (false)");
+    magic = createButton("Magic Cards (false)");
     button = createButton("Start");
 
     extended.hide();
     remove.hide();
+    magic.hide();
     button.hide();
 
     readTextFile(path + "themedata.json", function(text) {
         themedata = JSON.parse(text);
     });
 
-    createCanvas(800/scaleFactor,800/scaleFactor);
+    createCanvas(800 / scaleFactor, 800 / scaleFactor);
+    createWSConnection();
     playerData.Discard = "Cannot Discard";
 
     remove.mousePressed(function() {
@@ -116,6 +119,16 @@ function setup() {
         } else {
             removeActive = true;
             remove.html("Remove Cards (true)");
+        }
+    });
+
+    magic.mousePressed(function() {
+        if (magicActive) {
+            magicActive = false;
+            magic.html("Magic Cards (false)");
+        } else {
+            magicActive = true;
+            magic.html("Magic Cards (true)");
         }
     });
 
@@ -130,7 +143,7 @@ function setup() {
     });
 
     button.mousePressed(function() {
-        socket.send(JSON.stringify({type:"START", clientKey: key, return: {extended: extendedActive, remove: removeActive}}));
+        socket.send(JSON.stringify({ type: "START", clientKey: key, return: { extended: extendedActive, remove: removeActive, magic: magicActive } }));
     });
 }
 
@@ -140,7 +153,7 @@ function setup() {
  */
 function draw() {
     background(127);
-    image(backg,0,0,800/scaleFactor,800/scaleFactor);
+    image(backg, 0, 0, 800 / scaleFactor, 800 / scaleFactor);
 
     if (themedata["EFFECT"] === "magic") {
         magicEffectDraw();
@@ -150,37 +163,37 @@ function draw() {
 
     textFont(font);
     textSize(24);
-    drawCard(playerData.StockCard, createVector(700/scaleFactor,600/scaleFactor),100/scaleFactor, "Stock Pile");
+    drawCard(playerData.StockCard, createVector(700 / scaleFactor, 600 / scaleFactor), 100 / scaleFactor, "Stock Pile");
 
-    drawCard(playerData.Discard1Card, createVector(200/scaleFactor,600/scaleFactor),100/scaleFactor, "Discard Pile");
-    drawCard(playerData.Discard2Card, createVector(300/scaleFactor,600/scaleFactor),100/scaleFactor, "Discard Pile");
-    drawCard(playerData.Discard3Card, createVector(400/scaleFactor,600/scaleFactor),100/scaleFactor, "Discard Pile");
-    drawCard(playerData.Discard4Card, createVector(500/scaleFactor,600/scaleFactor),100/scaleFactor, "Discard Pile");
+    drawCard(playerData.Discard1Card, createVector(200 / scaleFactor, 600 / scaleFactor), 100 / scaleFactor, "Discard Pile");
+    drawCard(playerData.Discard2Card, createVector(300 / scaleFactor, 600 / scaleFactor), 100 / scaleFactor, "Discard Pile");
+    drawCard(playerData.Discard3Card, createVector(400 / scaleFactor, 600 / scaleFactor), 100 / scaleFactor, "Discard Pile");
+    drawCard(playerData.Discard4Card, createVector(500 / scaleFactor, 600 / scaleFactor), 100 / scaleFactor, "Discard Pile");
 
-    drawCard(playerData.Build1Card, createVector(200/scaleFactor,0/scaleFactor),100/scaleFactor, "Build Pile");
-    drawCard(playerData.Build2Card, createVector(300/scaleFactor,0/scaleFactor),100/scaleFactor, "Build Pile");
-    drawCard(playerData.Build3Card, createVector(400/scaleFactor,0/scaleFactor),100/scaleFactor, "Build Pile");
-    drawCard(playerData.Build4Card, createVector(500/scaleFactor,0/scaleFactor),100/scaleFactor, "Build Pile");
+    drawCard(playerData.Build1Card, createVector(200 / scaleFactor, 0 / scaleFactor), 100 / scaleFactor, "Build Pile");
+    drawCard(playerData.Build2Card, createVector(300 / scaleFactor, 0 / scaleFactor), 100 / scaleFactor, "Build Pile");
+    drawCard(playerData.Build3Card, createVector(400 / scaleFactor, 0 / scaleFactor), 100 / scaleFactor, "Build Pile");
+    drawCard(playerData.Build4Card, createVector(500 / scaleFactor, 0 / scaleFactor), 100 / scaleFactor, "Build Pile");
 
-    drawCard(playerData.Hand1Card, createVector(150/scaleFactor,300/scaleFactor),100/scaleFactor, "Hand");
-    drawCard(playerData.Hand2Card, createVector(250/scaleFactor,300/scaleFactor),100/scaleFactor, "Hand");
-    drawCard(playerData.Hand3Card, createVector(350/scaleFactor,300/scaleFactor),100/scaleFactor, "Hand");
-    drawCard(playerData.Hand4Card, createVector(450/scaleFactor,300/scaleFactor),100/scaleFactor, "Hand");
-    drawCard(playerData.Hand5Card, createVector(550/scaleFactor,300/scaleFactor),100/scaleFactor, "Hand");
+    drawCard(playerData.Hand1Card, createVector(150 / scaleFactor, 300 / scaleFactor), 100 / scaleFactor, "Hand");
+    drawCard(playerData.Hand2Card, createVector(250 / scaleFactor, 300 / scaleFactor), 100 / scaleFactor, "Hand");
+    drawCard(playerData.Hand3Card, createVector(350 / scaleFactor, 300 / scaleFactor), 100 / scaleFactor, "Hand");
+    drawCard(playerData.Hand4Card, createVector(450 / scaleFactor, 300 / scaleFactor), 100 / scaleFactor, "Hand");
+    drawCard(playerData.Hand5Card, createVector(550 / scaleFactor, 300 / scaleFactor), 100 / scaleFactor, "Hand");
 
-    drawCard(playerData.Discard, createVector(0/scaleFactor,600/scaleFactor), 100/scaleFactor, "You should not see this!");
+    drawCard(playerData.Discard, createVector(0 / scaleFactor, 600 / scaleFactor), 100 / scaleFactor, "You should not see this!");
 }
 
 
 /**
  * p5 Function
  */
-function mouseClicked() { 
-    if (checkPoint(700/scaleFactor,600/scaleFactor,100/scaleFactor)) {
+function mouseClicked() {
+    if (checkPoint(700 / scaleFactor, 600 / scaleFactor, 100 / scaleFactor)) {
         setValue("Selected", "StockCard");
     }
 
-    if (checkPoint(200/scaleFactor,600/scaleFactor,100/scaleFactor)) {
+    if (checkPoint(200 / scaleFactor, 600 / scaleFactor, 100 / scaleFactor)) {
         if (getValue("Discard") === "Cannot Discard") {
             setValue("Selected", "Discard1Card");
         } else {
@@ -195,7 +208,7 @@ function mouseClicked() {
             setValue("Selected", undefined);
         }
     }
-    if (checkPoint(300/scaleFactor,600/scaleFactor,100/scaleFactor)) {
+    if (checkPoint(300 / scaleFactor, 600 / scaleFactor, 100 / scaleFactor)) {
         if (getValue("Discard") === "Cannot Discard") {
             setValue("Selected", "Discard2Card");
         } else {
@@ -210,7 +223,7 @@ function mouseClicked() {
             setValue("Selected", undefined);
         }
     }
-    if (checkPoint(400/scaleFactor,600/scaleFactor,100/scaleFactor)) {
+    if (checkPoint(400 / scaleFactor, 600 / scaleFactor, 100 / scaleFactor)) {
         if (getValue("Discard") === "Cannot Discard") {
             setValue("Selected", "Discard3Card");
         } else {
@@ -225,7 +238,7 @@ function mouseClicked() {
             setValue("Selected", undefined);
         }
     }
-    if (checkPoint(500/scaleFactor,600/scaleFactor,100/scaleFactor)) {
+    if (checkPoint(500 / scaleFactor, 600 / scaleFactor, 100 / scaleFactor)) {
         if (getValue("Discard") === "Cannot Discard") {
             setValue("Selected", "Discard4Card");
         } else {
@@ -241,23 +254,23 @@ function mouseClicked() {
         }
     }
 
-    if (checkPoint(150/scaleFactor,300/scaleFactor,100/scaleFactor)) {
+    if (checkPoint(150 / scaleFactor, 300 / scaleFactor, 100 / scaleFactor)) {
         setValue("Selected", "Hand1Card");
     }
-    if (checkPoint(250/scaleFactor,300/scaleFactor,100/scaleFactor)) {
+    if (checkPoint(250 / scaleFactor, 300 / scaleFactor, 100 / scaleFactor)) {
         setValue("Selected", "Hand2Card");
     }
-    if (checkPoint(350/scaleFactor,300/scaleFactor,100/scaleFactor)) {
+    if (checkPoint(350 / scaleFactor, 300 / scaleFactor, 100 / scaleFactor)) {
         setValue("Selected", "Hand3Card");
     }
-    if (checkPoint(450/scaleFactor,300/scaleFactor,100/scaleFactor)) {
+    if (checkPoint(450 / scaleFactor, 300 / scaleFactor, 100 / scaleFactor)) {
         setValue("Selected", "Hand4Card");
     }
-    if (checkPoint(550/scaleFactor,300/scaleFactor,100/scaleFactor)) {
+    if (checkPoint(550 / scaleFactor, 300 / scaleFactor, 100 / scaleFactor)) {
         setValue("Selected", "Hand5Card");
     }
 
-    if (checkPoint(200/scaleFactor,0/scaleFactor,100/scaleFactor)) {
+    if (checkPoint(200 / scaleFactor, 0 / scaleFactor, 100 / scaleFactor)) {
         if (getValue("Selected") != null && getValue("Selected") != undefined) {
             socket.send(JSON.stringify({
                 type: "PLACE",
@@ -270,7 +283,7 @@ function mouseClicked() {
             setValue("Selected", undefined);
         }
     }
-    if (checkPoint(300/scaleFactor,0/scaleFactor,100/scaleFactor)) {
+    if (checkPoint(300 / scaleFactor, 0 / scaleFactor, 100 / scaleFactor)) {
         if (getValue("Selected") != null && getValue("Selected") != undefined) {
             socket.send(JSON.stringify({
                 type: "PLACE",
@@ -283,7 +296,7 @@ function mouseClicked() {
             setValue("Selected", undefined);
         }
     }
-    if (checkPoint(400/scaleFactor,0/scaleFactor,100/scaleFactor)) {
+    if (checkPoint(400 / scaleFactor, 0 / scaleFactor, 100 / scaleFactor)) {
         if (getValue("Selected") != null && getValue("Selected") != undefined) {
             socket.send(JSON.stringify({
                 type: "PLACE",
@@ -296,7 +309,7 @@ function mouseClicked() {
             setValue("Selected", undefined);
         }
     }
-    if (checkPoint(500/scaleFactor,0/scaleFactor,100/scaleFactor)) {
+    if (checkPoint(500 / scaleFactor, 0 / scaleFactor, 100 / scaleFactor)) {
         if (getValue("Selected") != null && getValue("Selected") != undefined) {
             socket.send(JSON.stringify({
                 type: "PLACE",
@@ -310,8 +323,8 @@ function mouseClicked() {
         }
     }
 
-    if (checkPoint(0/scaleFactor,600/scaleFactor,100/scaleFactor)) {
-        if(getValue("Discard") === "Cannot Discard") {
+    if (checkPoint(0 / scaleFactor, 600 / scaleFactor, 100 / scaleFactor)) {
+        if (getValue("Discard") === "Cannot Discard") {
             setValue("Discard", "Can Discard");
         } else {
             setValue("Discard", "Cannot Discard");
@@ -332,37 +345,42 @@ function drawCard(cardText, pos, size, tooltip) {
     if (cardText != null && cardText != undefined && cardText != "") {
         if (typeof(cardText) !== "string") cardText = "ERROR";
         let sb = false;
-        let rc = false
+        let rc = false;
+        let mc = false;
         if (cardText.includes("~SB~")) {
-            sb = true
+            sb = true;
             cardText = cardText.replace(/~SB~/g, "");
         }
         if (cardText.includes("~RC~")) {
-            rc = true
+            rc = true;
             cardText = cardText.replace(/~RC~/g, "");
         }
+        if (cardText.includes("~MC~")) {
+            mc = true;
+            cardText = cardText.replace(/~MC~/g, "");
+        }
         textAlign(CENTER, CENTER);
-        fill(0,0,0,0);
+        fill(0, 0, 0, 0);
         stroke(themedata["BORDER"]);
-        image(card,pos.x,pos.y,size,size*2)
-        rect(pos.x,pos.y,size,size*2, 5, 5, 5, 5);
-        stroke(0,0,0,0);
+        image(card, pos.x, pos.y, size, size * 2)
+        rect(pos.x, pos.y, size, size * 2, 5, 5, 5, 5);
+        stroke(0, 0, 0, 0);
         if (themedata[cardText] != null && themedata[cardText] != undefined) {
             fill(themedata[cardText]);
         } else {
-            fill([255,0,0]);
+            fill([255, 0, 0]);
         }
         push();
         translate(pos.x, pos.y);
-        text("" + cardText + "",0,0,size,size*2);
+        text("" + cardText + "", 0, 0, size, size * 2);
         pop();
         if (sb) {
             fill(themedata["SB"]);
             textSize(16);
             push();
-            translate(pos.x,pos.y);
+            translate(pos.x, pos.y);
             textAlign(RIGHT, TOP);
-            text("SB", 0, 0, size, size*2);
+            text("SB", 0, 0, size, size * 2);
             pop();
             textSize(24);
         }
@@ -370,24 +388,34 @@ function drawCard(cardText, pos, size, tooltip) {
             fill(themedata["RC"]);
             textSize(16);
             push();
-            translate(pos.x,pos.y);
+            translate(pos.x, pos.y);
             textAlign(RIGHT, TOP);
-            text("RC", 0, 0, size, size*2);
+            text("RC", 0, 0, size, size * 2);
+            pop();
+            textSize(24);
+        }
+        if (mc) {
+            fill(themedata["MC"]);
+            textSize(16);
+            push();
+            translate(pos.x, pos.y);
+            textAlign(RIGHT, TOP);
+            text("MC", 0, 0, size, size * 2);
             pop();
             textSize(24);
         }
         fill(0);
-        stroke(0,0,0,0);
+        stroke(0, 0, 0, 0);
         textAlign(LEFT, TOP);
     } else {
-        fill(0,0,0,0);
+        fill(0, 0, 0, 0);
         stroke(themedata["BORDER"]);
-        rect(pos.x, pos.y, size,size*2, 5, 5, 5, 5);
+        rect(pos.x, pos.y, size, size * 2, 5, 5, 5, 5);
         fill(themedata["BORDER"]);
-        stroke(0,0,0,0);
+        stroke(0, 0, 0, 0);
         textAlign(CENTER, CENTER);
-        text(tooltip,pos.x,pos.y,size,size*2);
-        stroke(0,0,0,0);
+        text(tooltip, pos.x, pos.y, size, size * 2);
+        stroke(0, 0, 0, 0);
     }
 }
 
@@ -446,7 +474,7 @@ function socketMessage(event) {
         return;
     } else {
         let type = object.return_type;
-        let data = {return: {}};
+        let data = { return: {} };
         object.run.forEach(command => {
             if (command.type === "MESSAGE") {
                 data.return[command.name] = infoMessage(command.info);
@@ -461,7 +489,7 @@ function socketMessage(event) {
                 takeTurn();
             }
             if (command.name === "WinMessage") {
-                socket.send(JSON.stringify({type:"START", clientKey: key, return: {extended: extendedActive, remove: removeActive}}));
+                socket.send(JSON.stringify({ type: "START", clientKey: key, return: { extended: extendedActive, remove: removeActive } }));
                 takeTurn();
             }
             if (command.type === "ADD") {
@@ -514,10 +542,12 @@ function setValue(key, value) {
             button.show();
             remove.show();
             extended.show();
+            magic.show();
         } else {
             button.hide();
             remove.hide();
             extended.hide();
+            magic.hide();
         }
     }
 
@@ -528,7 +558,7 @@ function setValue(key, value) {
         playerData.playerList.forEach(p => {
             if (playerData.selectedPlayer != null && playerData.selectedPlayer != undefined) {
                 if (p === playerData.selectedPlayer) {
-                    tmp = "<span style='color:#FF7F00;'>" +  "=> " + "</span>";
+                    tmp = "<span style='color:#FF7F00;'>" + "=> " + "</span>";
                 } else {
                     tmp = "";
                 }
@@ -538,7 +568,7 @@ function setValue(key, value) {
                 playerData.otherCards = {};
             }
 
-            if(playerData.otherCards[p] == null || playerData.otherCards[p] == undefined) {
+            if (playerData.otherCards[p] == null || playerData.otherCards[p] == undefined) {
                 playerData.otherCards[p] = {
                     "StockCard": " ",
                     "StockAmount": 0
@@ -552,7 +582,7 @@ function setValue(key, value) {
                 tmp2 = "<span style='font-family: " + (theme + "-theme") + ";'>" + playerData.otherCards[p]["StockCard"] + "</span>";
             }
 
-            str = str + "<span>" + tmp + p + " [" + tmp2 + "]" +  "</span><hr/>"
+            str = str + "<span>" + tmp + p + " [" + tmp2 + "]" + "</span><hr/>"
         });
         playerListElement.html(str);
     }
@@ -578,9 +608,9 @@ function getValue(key) {
  * @param {number} x2 card Width
  * @returns {boolean}
  */
-function checkPoint(x1,y1,x2) {
-    let y2 = x2*2;
-    if (mouseX >= x1 && mouseY >= y1 && mouseX <= x1+x2 && mouseY <= y1+y2) {
+function checkPoint(x1, y1, x2) {
+    let y2 = x2 * 2;
+    if (mouseX >= x1 && mouseY >= y1 && mouseX <= x1 + x2 && mouseY <= y1 + y2) {
         return true;
     }
     return false;
@@ -591,7 +621,7 @@ function checkPoint(x1,y1,x2) {
  * Function to add a player to the player List
  * @param {string} name 
  */
- function addPlayer(name) {
+function addPlayer(name) {
     playerList.push(name);
     let str = "";
     playerList.forEach(p => {
@@ -607,11 +637,11 @@ function checkPoint(x1,y1,x2) {
  * @returns {string} key
  */
 function makeid(length) {
-    var result           = '';
-    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     var charactersLength = characters.length;
-    for ( var i = 0; i < length; i++ ) {
-       result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    for (var i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     result += "~BOT~";
     return result;
@@ -634,7 +664,7 @@ function takeTurn() {
                         pop: c,
                         push: c1
                     }
-            })), 10);
+                })), 10);
         });
     });
     pop.forEach(c => {
@@ -643,7 +673,7 @@ function takeTurn() {
             clientKey: key,
             return: {
                 pop: c,
-                push: "Discard" + (Math.floor(Math.random()*4)+1) + "Card"
+                push: "Discard" + (Math.floor(Math.random() * 4) + 1) + "Card"
             }
         }));
     });
@@ -701,8 +731,8 @@ function effectPreinit() {
  * Function to draw magic effect
  */
 function magicEffectDraw() {
-    let tmp = frameCount%(800/scaleFactor);
-    image(magicMap, 0, 0, 800/scaleFactor, 800/scaleFactor, tmp+800+-clamp(mouseX,0,800), tmp+800+-clamp(mouseY,0,800), 800/scaleFactor, 800/scaleFactor);
+    let tmp = frameCount % (800 / scaleFactor);
+    image(magicMap, 0, 0, 800 / scaleFactor, 800 / scaleFactor, tmp + 800 + -clamp(mouseX, 0, 800), tmp + 800 + -clamp(mouseY, 0, 800), 800 / scaleFactor, 800 / scaleFactor);
 }
 
 
@@ -710,7 +740,7 @@ function magicEffectDraw() {
  * Function to draw snow effect
  */
 function snowEffectDraw() {
-    let tmp = frameCount%(800/scaleFactor);
-    tmp = (800/scaleFactor)-tmp
-    image(snowMap, 0, 0, 800/scaleFactor, 800/scaleFactor, tmp+800, tmp+800, 800/scaleFactor, 800/scaleFactor);
+    let tmp = frameCount % (800 / scaleFactor);
+    tmp = (800 / scaleFactor) - tmp
+    image(snowMap, 0, 0, 800 / scaleFactor, 800 / scaleFactor, tmp + 800, tmp + 800, 800 / scaleFactor, 800 / scaleFactor);
 }

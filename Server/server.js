@@ -3,37 +3,53 @@ const server = new WebSocket.Server({
     port: 15000
 });
 
-const cards = [ "1","1","1","1","1","1","1","1","1","1","1","1", 
-                "2","2","2","2","2","2","2","2","2","2","2","2",
-                "3","3","3","3","3","3","3","3","3","3","3","3",
-                "4","4","4","4","4","4","4","4","4","4","4","4",
-                "5","5","5","5","5","5","5","5","5","5","5","5",
-                "6","6","6","6","6","6","6","6","6","6","6","6",
-                "7","7","7","7","7","7","7","7","7","7","7","7",
-                "8","8","8","8","8","8","8","8","8","8","8","8",
-                "9","9","9","9","9","9","9","9","9","9","9","9",
-                "10","10","10","10","10","10","10","10","10","10","10","10",
-                "11","11","11","11","11","11","11","11","11","11","11","11",
-                "12","12","12","12","12","12","12","12","12","12","12","12",
-                "SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB" ]
+const readline = require('readline');
 
-const extended_cards = ["13","13","13","13","13","13","13","13","13","13","13","13",
-                        "14","14","14","14","14","14","14","14","14","14","14","14",
-                        "15","15","15","15","15","15","15","15","15","15","15","15",
-                        "16","16","16","16","16","16","16","16","16","16","16","16",
-                        "17","17","17","17","17","17","17","17","17","17","17","17",
-                        "18","18","18","18","18","18","18","18","18","18","18","18",
-                        "19","19","19","19","19","19","19","19","19","19","19","19",
-                        "20","20","20","20","20","20","20","20","20","20","20","20",
-                        "21","21","21","21","21","21","21","21","21","21","21","21",
-                        "22","22","22","22","22","22","22","22","22","22","22","22",
-                        "23","23","23","23","23","23","23","23","23","23","23","23",
-                        "24","24","24","24","24","24","24","24","24","24","24","24",
-                        "SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB","SB"]
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
 
-const remove_cards = [  "RC","RC","RC","RC","RC","RC","RC","RC","RC","RC","RC","RC","RC","RC","RC","RC","RC","RC"  ]
+const cards = ["1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1",
+    "2", "2", "2", "2", "2", "2", "2", "2", "2", "2", "2", "2",
+    "3", "3", "3", "3", "3", "3", "3", "3", "3", "3", "3", "3",
+    "4", "4", "4", "4", "4", "4", "4", "4", "4", "4", "4", "4",
+    "5", "5", "5", "5", "5", "5", "5", "5", "5", "5", "5", "5",
+    "6", "6", "6", "6", "6", "6", "6", "6", "6", "6", "6", "6",
+    "7", "7", "7", "7", "7", "7", "7", "7", "7", "7", "7", "7",
+    "8", "8", "8", "8", "8", "8", "8", "8", "8", "8", "8", "8",
+    "9", "9", "9", "9", "9", "9", "9", "9", "9", "9", "9", "9",
+    "10", "10", "10", "10", "10", "10", "10", "10", "10", "10", "10", "10",
+    "11", "11", "11", "11", "11", "11", "11", "11", "11", "11", "11", "11",
+    "12", "12", "12", "12", "12", "12", "12", "12", "12", "12", "12", "12",
+    "SB", "SB", "SB", "SB", "SB", "SB", "SB", "SB", "SB", "SB", "SB", "SB", "SB", "SB", "SB", "SB", "SB", "SB"
+]
 
-let draw_pile = [], build_pile_1 = [], build_pile_2 = [], build_pile_3 = [], build_pile_4 = [], build_piles = [];
+const extended_cards = ["13", "13", "13", "13", "13", "13", "13", "13", "13", "13", "13", "13",
+    "14", "14", "14", "14", "14", "14", "14", "14", "14", "14", "14", "14",
+    "15", "15", "15", "15", "15", "15", "15", "15", "15", "15", "15", "15",
+    "16", "16", "16", "16", "16", "16", "16", "16", "16", "16", "16", "16",
+    "17", "17", "17", "17", "17", "17", "17", "17", "17", "17", "17", "17",
+    "18", "18", "18", "18", "18", "18", "18", "18", "18", "18", "18", "18",
+    "19", "19", "19", "19", "19", "19", "19", "19", "19", "19", "19", "19",
+    "20", "20", "20", "20", "20", "20", "20", "20", "20", "20", "20", "20",
+    "21", "21", "21", "21", "21", "21", "21", "21", "21", "21", "21", "21",
+    "22", "22", "22", "22", "22", "22", "22", "22", "22", "22", "22", "22",
+    "23", "23", "23", "23", "23", "23", "23", "23", "23", "23", "23", "23",
+    "24", "24", "24", "24", "24", "24", "24", "24", "24", "24", "24", "24",
+    "SB", "SB", "SB", "SB", "SB", "SB", "SB", "SB", "SB", "SB", "SB", "SB", "SB", "SB", "SB", "SB", "SB", "SB"
+];
+
+const remove_cards = ["RC", "RC", "RC", "RC", "RC", "RC", "RC", "RC", "RC", "RC", "RC", "RC", "RC", "RC", "RC", "RC", "RC", "RC"];
+
+const magic_cards = ["MC", "MC"];
+
+let draw_pile = [],
+    build_pile_1 = [],
+    build_pile_2 = [],
+    build_pile_3 = [],
+    build_pile_4 = [],
+    build_piles = [];
 
 let turn_index = 0;
 
@@ -53,8 +69,7 @@ const CheckJSON = {
 
 const LoginJSON = {
     return_type: "LOGIN",
-    run: [
-        {
+    run: [{
             name: "password",
             type: "PROMPT",
             info: "Password"
@@ -69,8 +84,7 @@ const LoginJSON = {
 
 const AuthFailedJSON = {
     return_type: "LOGIN",
-    run: [
-        {
+    run: [{
             name: "AuthError",
             type: "MESSAGE",
             info: "Incorrect password! Please try again!"
@@ -90,19 +104,16 @@ const AuthFailedJSON = {
 
 const NameJSON = {
     return_type: "NAME",
-    run: [
-        {
-            name: "name",
-            type: "PROMPT",
-            info: "Enter your name"
-        }
-    ]
+    run: [{
+        name: "name",
+        type: "PROMPT",
+        info: "Enter your name"
+    }]
 }
 
 const NameTakenJSON = {
     return_type: "NAME",
-    run: [
-        {
+    run: [{
             name: "NameError",
             type: "MESSAGE",
             info: "Name already taken! Please try again!"
@@ -117,46 +128,38 @@ const NameTakenJSON = {
 
 const NotHostJSON = {
     return_type: null,
-    run: [
-        {
-            name: "NotHostError",
-            type: "MESSAGE",
-            info: "You are not host and cannot do this!"
-        }
-    ]
+    run: [{
+        name: "NotHostError",
+        type: "MESSAGE",
+        info: "You are not host and cannot do this!"
+    }]
 }
 
 const NotEnoughPlayersJSON = {
     return_type: null,
-    run: [
-        {
-            name: "NotEnoughPlayersError",
-            type: "MESSAGE",
-            info: "Not enough players to start the game!"
-        }
-    ]
+    run: [{
+        name: "NotEnoughPlayersError",
+        type: "MESSAGE",
+        info: "Not enough players to start the game!"
+    }]
 }
 
 const TooManyPlayersJSON = {
     return_type: null,
-    run: [
-        {
-            name: "TooManyPlayersError",
-            type: "MESSAGE",
-            info: "Too many players to start the game!"
-        }
-    ]
+    run: [{
+        name: "TooManyPlayersError",
+        type: "MESSAGE",
+        info: "Too many players to start the game!"
+    }]
 }
 
 const NotYourTurnJSON = {
     return_type: null,
-    run: [
-        {
-            name: "NotYourTurnError",
-            type: "MESSAGE",
-            info: "You cannot do this as it is not your turn!"
-        }
-    ]
+    run: [{
+        name: "NotYourTurnError",
+        type: "MESSAGE",
+        info: "You cannot do this as it is not your turn!"
+    }]
 }
 
 /*
@@ -176,13 +179,13 @@ server.on('timeout', function(timedOutSocket) {
     console.log("TIME OUT");
     timedOutSocket.write('socket timed out!');
     timedOutSocket.end();
-  });
+});
 
 server.on('connection', function(socket) {
     sockets.push(socket);
     console.log("Connection recived!");
-    
-    
+
+
     socket.send(JSON.stringify(CheckJSON));
 
     // When you receive a message, do stuff
@@ -198,7 +201,7 @@ server.on('connection', function(socket) {
 
         if (object.type === "LOGIN") { //Login
             console.log("Recived Login message!");
-            authData[object.clientKey] = {socket: socket};
+            authData[object.clientKey] = { socket: socket };
             if (object.return.password === password) {
                 authData[object.clientKey].Auth = true;
             }
@@ -219,7 +222,7 @@ server.on('connection', function(socket) {
                 let found = false;
                 keys.forEach(s => {
                     if (playerData[s] != null && playerData[s] != undefined) {
-                        if (playerData[s].name === object.return.name) {found = true;}
+                        if (playerData[s].name === object.return.name) { found = true; }
                     }
                 });
                 if (found) {
@@ -229,8 +232,7 @@ server.on('connection', function(socket) {
                     socket.send(JSON.stringify({
                         return_type: null,
                         clientKey: object.clientKey,
-                        run: [
-                            {
+                        run: [{
                                 name: "Host",
                                 type: "SET",
                                 value: authData[object.clientKey].Host
@@ -252,13 +254,11 @@ server.on('connection', function(socket) {
                         authData[s].socket.send(JSON.stringify({
                             return_type: null,
                             clientKey: null,
-                            run: [
-                                {
-                                    name: "playerList",
-                                    type: "SET",
-                                    value: temp
-                                }
-                            ]
+                            run: [{
+                                name: "playerList",
+                                type: "SET",
+                                value: temp
+                            }]
                         }));
                     });
                 }
@@ -274,16 +274,21 @@ server.on('connection', function(socket) {
                         build_pile_1 = [], build_pile_2 = [], build_pile_3 = [], build_pile_4 = [], turn_index = 0;
                         draw_pile = [...cards];
                         if (object.return.extended) {
-                            topCard = "24"
-                            for (let i=0;i<extended_cards.length;i++) {
-                                draw_pile.push(extended_cards[i])
+                            topCard = "24";
+                            for (let i = 0; i < extended_cards.length; i++) {
+                                draw_pile.push(extended_cards[i]);
                             }
                         } else {
-                            topCard = "12"
+                            topCard = "12";
                         }
                         if (object.return.remove) {
-                            for (let i=0;i<remove_cards.length;i++) {
-                                draw_pile.push(remove_cards[i])
+                            for (let i = 0; i < remove_cards.length; i++) {
+                                draw_pile.push(remove_cards[i]);
+                            }
+                        }
+                        if (object.return.magic) {
+                            for (let i = 0; i < magic_cards.length; i++) {
+                                draw_pile.push(magic_cards[i]);
                             }
                         }
                         shuffle(draw_pile);
@@ -297,13 +302,11 @@ server.on('connection', function(socket) {
                                 authData[s].socket.send(JSON.stringify({
                                     return_type: null,
                                     clientKey: s,
-                                    run: [
-                                        {
-                                            name: "StockCard",
-                                            type: "SET",
-                                            value: getTopCard(playerData[s].stock_pile)
-                                        }
-                                    ]
+                                    run: [{
+                                        name: "StockCard",
+                                        type: "SET",
+                                        value: getTopCard(playerData[s].stock_pile)
+                                    }]
                                 }));
                             });
                         } else {
@@ -316,13 +319,11 @@ server.on('connection', function(socket) {
                                 authData[s].socket.send(JSON.stringify({
                                     return_type: null,
                                     clientKey: s,
-                                    run: [
-                                        {
-                                            name: "StockCard",
-                                            type: "SET",
-                                            value: getTopCard(playerData[s].stock_pile)
-                                        }
-                                    ]
+                                    run: [{
+                                        name: "StockCard",
+                                        type: "SET",
+                                        value: getTopCard(playerData[s].stock_pile)
+                                    }]
                                 }));
                             });
                         }
@@ -339,8 +340,7 @@ server.on('connection', function(socket) {
                             authData[s].socket.send(JSON.stringify({
                                 return_type: null,
                                 clientKey: s,
-                                run: [
-                                    {
+                                run: [{
                                         name: "Hand1Card",
                                         type: "SET",
                                         value: playerData[s].hand[0]
@@ -433,7 +433,7 @@ server.on('connection', function(socket) {
                 socket.send(JSON.stringify(NotHostJSON));
             }
         }
-        
+
         if (object.type === "PLACE") {
             console.log("Recived Place Message!");
 
@@ -443,13 +443,11 @@ server.on('connection', function(socket) {
                     authData[s].socket.send(JSON.stringify({
                         return_type: null,
                         clientKey: null,
-                        run: [
-                            {
-                                name: "DrawPileEmpty",
-                                type: "MESSAGE",
-                                info: "The Draw Pile is empty! Emptying Discard Piles!"
-                            }
-                        ]
+                        run: [{
+                            name: "DrawPileEmpty",
+                            type: "MESSAGE",
+                            info: "The Draw Pile is empty! Emptying Discard Piles!"
+                        }]
                     }));
 
                     playerData[s].discard_pile_1.forEach(c => {
@@ -458,6 +456,9 @@ server.on('connection', function(socket) {
                         }
                         if (c.includes("~RC~")) {
                             c = "RC";
+                        }
+                        if (c.includes("~MC~")) {
+                            c = "MC";
                         }
                         draw_pile.push(c)
                     });
@@ -468,6 +469,9 @@ server.on('connection', function(socket) {
                         if (c.includes("~RC~")) {
                             c = "RC";
                         }
+                        if (c.includes("~MC~")) {
+                            c = "MC";
+                        }
                         draw_pile.push(c)
                     });
                     playerData[s].discard_pile_3.forEach(c => {
@@ -477,6 +481,9 @@ server.on('connection', function(socket) {
                         if (c.includes("~RC~")) {
                             c = "RC";
                         }
+                        if (c.includes("~MC~")) {
+                            c = "MC";
+                        }
                         draw_pile.push(c)
                     });
                     playerData[s].discard_pile_4.forEach(c => {
@@ -485,6 +492,9 @@ server.on('connection', function(socket) {
                         }
                         if (c.includes("~RC~")) {
                             c = "RC";
+                        }
+                        if (c.includes("~MC~")) {
+                            c = "MC";
                         }
                         draw_pile.push(c)
                     });
@@ -499,8 +509,7 @@ server.on('connection', function(socket) {
                     keys.forEach(s => {
                         authData[s].socket.send(JSON.stringify({
                             return_type: s,
-                            run: [
-                                {
+                            run: [{
                                     name: "Discard1Card",
                                     type: "SET",
                                     value: getTopCard("discard_pile_1", s)
@@ -539,7 +548,7 @@ server.on('connection', function(socket) {
                             if (getTopCard(translateDeckName(push, object.clientKey)) == undefined) console.log("ERROR IN PUSH");
                             turn_index++;
                             if (turn_index == keys.length) turn_index = 0;
-                            for (let i=0;i<5;i++) {
+                            for (let i = 0; i < 5; i++) {
                                 if (playerData[keys[turn_index]].hand[i] == null || playerData[keys[turn_index]].hand[i] == undefined) {
                                     playerData[keys[turn_index]].hand[i] = popCard(draw_pile);
                                     while (typeof(playerData[keys[turn_index]].hand[i]) !== "string") {
@@ -562,8 +571,7 @@ server.on('connection', function(socket) {
                                 authData[s].socket.send(JSON.stringify({
                                     return_type: null,
                                     clientKey: keys[turn_index],
-                                    run: [
-                                        {
+                                    run: [{
                                             name: "TurnAlert",
                                             type: "MESSAGE",
                                             info: "It is now your turn!"
@@ -598,13 +606,11 @@ server.on('connection', function(socket) {
                                 authData[s].socket.send(JSON.stringify({
                                     return_type: null,
                                     clientKey: null,
-                                    run: [
-                                        {
-                                            name: "selectedPlayer",
-                                            type: "SET",
-                                            value: playerData[keys[turn_index]].name
-                                        }
-                                    ]
+                                    run: [{
+                                        name: "selectedPlayer",
+                                        type: "SET",
+                                        value: playerData[keys[turn_index]].name
+                                    }]
                                 }));
                             });
                             countCards();
@@ -615,16 +621,27 @@ server.on('connection', function(socket) {
                                 let top_card = getTopCard(translateDeckName(push, object.clientKey));
                                 if (top_card != undefined && top_card != null) top_card = top_card.replace(/~SB~/g, "");
                                 if (top_card != undefined && top_card != null) top_card = top_card.replace(/~RC~/g, "");
+                                if (top_card != undefined && top_card != null) top_card = top_card.replace(/~MC~/g, "");
                                 if (top_card == null || top_card == undefined || top_card == Number.NaN) top_card = "0";
-                                pushCard(translateDeckName(pop, object.clientKey),"~SB~".concat(parseInt(top_card) + 1));
+                                pushCard(translateDeckName(pop, object.clientKey), "~SB~".concat(parseInt(top_card) + 1));
                             }
                             if (getTopCard(translateDeckName(pop, object.clientKey)) === "RC") {
                                 let old = popCard(translateDeckName(pop, object.clientKey));
                                 let top_card = getTopCard(translateDeckName(push, object.clientKey));
                                 if (top_card != undefined && top_card != null) top_card = top_card.replace(/~SB~/g, "");
                                 if (top_card != undefined && top_card != null) top_card = top_card.replace(/~RC~/g, "");
+                                if (top_card != undefined && top_card != null) top_card = top_card.replace(/~MC~/g, "");
                                 if ((top_card == null || top_card == undefined || top_card == Number.NaN || top_card === "0") && old === "RC") return;
-                                pushCard(translateDeckName(pop, object.clientKey),"~RC~".concat(parseInt(top_card) + -1));
+                                pushCard(translateDeckName(pop, object.clientKey), "~RC~".concat(parseInt(top_card) + -1));
+                            }
+                            if (getTopCard(translateDeckName(pop, object.clientKey)) === "MC") {
+                                let old = popCard(translateDeckName(pop, object.clientKey));
+                                let top_card = getTopCard(translateDeckName(push, object.clientKey));
+                                if (top_card != undefined && top_card != null) top_card = top_card.replace(/~SB~/g, "");
+                                if (top_card != undefined && top_card != null) top_card = top_card.replace(/~RC~/g, "");
+                                if (top_card != undefined && top_card != null) top_card = top_card.replace(/~MC~/g, "");
+                                if (top_card == null || top_card == undefined || top_card == Number.NaN || top_card === "0") return;
+                                pushCard(translateDeckName(pop, object.clientKey), "~MC~".concat(topCard));
                             }
                             if (CheckCardPlacement(translateDeckName(push, object.clientKey), getTopCard(translateDeckName(pop, object.clientKey)))) {
                                 pushCard(translateDeckName(push, object.clientKey), popCard(translateDeckName(pop, object.clientKey)));
@@ -635,8 +652,7 @@ server.on('connection', function(socket) {
                                     authData[s].socket.send(JSON.stringify({
                                         return_type: null,
                                         clicntKey: null,
-                                        run: [
-                                            {
+                                        run: [{
                                                 name: "WinMessage",
                                                 type: "MESSAGE",
                                                 info: playerData[object.clientKey].name + " has won the game!"
@@ -662,13 +678,11 @@ server.on('connection', function(socket) {
                                     authData[s].socket.send(JSON.stringify({
                                         return_type: null,
                                         clientKey: null,
-                                        run: [
-                                            {
-                                                name: "otherCards",
-                                                type: "SET",
-                                                value: tmp
-                                            }
-                                        ]
+                                        run: [{
+                                            name: "otherCards",
+                                            type: "SET",
+                                            value: tmp
+                                        }]
                                     }));
                                 });
                             }
@@ -677,6 +691,7 @@ server.on('connection', function(socket) {
                                 let top_card = getTopCard(translateDeckName(push, object.clientKey));
                                 if (top_card != undefined && top_card != null) top_card = top_card.replace(/~SB~/g, "");
                                 if (top_card != undefined && top_card != null) top_card = top_card.replace(/~RC~/g, "");
+                                if (top_card != undefined && top_card != null) top_card = top_card.replace(/~MC~/g, "");
                                 if (top_card == null || top_card == undefined || top_card == Number.NaN) top_card = "0";
                                 let deck = translateDeckName(pop, object.clientKey);
                                 setHandCard(pop, object.clientKey, "~SB~".concat(parseInt(top_card) + 1));
@@ -685,14 +700,24 @@ server.on('connection', function(socket) {
                                 let top_card = getTopCard(translateDeckName(push, object.clientKey));
                                 if (top_card != undefined && top_card != null) top_card = top_card.replace(/~SB~/g, "");
                                 if (top_card != undefined && top_card != null) top_card = top_card.replace(/~RC~/g, "");
+                                if (top_card != undefined && top_card != null) top_card = top_card.replace(/~MC~/g, "");
                                 if ((top_card == null || top_card == undefined || top_card == Number.NaN || top_card === "0") && translateDeckName(pop, object.clientKey) === "RC") return;
                                 setHandCard(pop, object.clientKey, "~RC~".concat(parseInt(top_card) + -1));
+                            }
+                            if (translateDeckName(pop, object.clientKey) === "MC") {
+                                let top_card = getTopCard(translateDeckName(push, object.clientKey));
+                                if (top_card != undefined && top_card != null) top_card = top_card.replace(/~SB~/g, "");
+                                if (top_card != undefined && top_card != null) top_card = top_card.replace(/~RC~/g, "");
+                                if (top_card != undefined && top_card != null) top_card = top_card.replace(/~MC~/g, "");
+                                if (top_card == null || top_card == undefined || top_card == Number.NaN) top_card = "0";
+                                let deck = translateDeckName(pop, object.clientKey);
+                                setHandCard(pop, object.clientKey, "~MC~".concat(topCard));
                             }
 
                             if (CheckCardPlacement(translateDeckName(push, object.clientKey), translateDeckName(pop, object.clientKey))) {
                                 pushCard(translateDeckName(push, object.clientKey), popHandCard(pop, object.clientKey));
                                 let count = 0;
-                                for (let i=0;i<5;i++) {
+                                for (let i = 0; i < 5; i++) {
                                     if (playerData[object.clientKey].hand[i] == null || playerData[object.clientKey].hand[i] == undefined) count++;
                                 }
                                 if (count >= 5) {
@@ -706,8 +731,7 @@ server.on('connection', function(socket) {
                                     authData[object.clientKey].socket.send(JSON.stringify({
                                         return_type: null,
                                         clientKey: object.clientKey,
-                                        run: [
-                                            {
+                                        run: [{
                                                 name: "Hand1Card",
                                                 type: "SET",
                                                 value: playerData[object.clientKey].hand[0]
@@ -741,13 +765,17 @@ server.on('connection', function(socket) {
                         let card = getTopCard(build_pile_1);
                         if (card != undefined && card != null) card = card.replace(/~SB~/g, "");
                         if (card != undefined && card != null) card = card.replace(/~RC~/g, "");
+                        if (card != undefined && card != null) card = card.replace(/~MC~/g, "");
                         if (card === topCard) {
-                            for (let i=0;i<build_pile_1.length;i++) {
+                            for (let i = 0; i < build_pile_1.length; i++) {
                                 if (build_pile_1[i].includes("~SB~")) {
                                     build_pile_1[i] = "SB";
                                 }
                                 if (build_pile_1[i].includes("~RC~")) {
                                     build_pile_1[i] = "RC";
+                                }
+                                if (build_pile_1[i].includes("~MC~")) {
+                                    build_pile_1[i] = "MC";
                                 }
                                 draw_pile.push(build_pile_1[i])
                             }
@@ -757,13 +785,17 @@ server.on('connection', function(socket) {
                         card = getTopCard(build_pile_2);
                         if (card != undefined && card != null) card = card.replace(/~SB~/g, "");
                         if (card != undefined && card != null) card = card.replace(/~RC~/g, "");
+                        if (card != undefined && card != null) card = card.replace(/~MC~/g, "");
                         if (card === topCard) {
-                            for (let i=0;i<build_pile_2.length;i++) {
+                            for (let i = 0; i < build_pile_2.length; i++) {
                                 if (build_pile_2[i].includes("~SB~")) {
                                     build_pile_2[i] = "SB";
                                 }
                                 if (build_pile_2[i].includes("~RC~")) {
                                     build_pile_2[i] = "RC";
+                                }
+                                if (build_pile_2[i].includes("~MC~")) {
+                                    build_pile_2[i] = "MC";
                                 }
                                 draw_pile.push(build_pile_2[i])
                             }
@@ -773,13 +805,17 @@ server.on('connection', function(socket) {
                         card = getTopCard(build_pile_3);
                         if (card != undefined && card != null) card = card.replace(/~SB~/g, "");
                         if (card != undefined && card != null) card = card.replace(/~RC~/g, "");
+                        if (card != undefined && card != null) card = card.replace(/~MC~/g, "");
                         if (card === topCard) {
-                            for (let i=0;i<build_pile_3.length;i++) {
+                            for (let i = 0; i < build_pile_3.length; i++) {
                                 if (build_pile_3[i].includes("~SB~")) {
                                     build_pile_3[i] = "SB";
                                 }
                                 if (build_pile_3[i].includes("~RC~")) {
                                     build_pile_3[i] = "RC";
+                                }
+                                if (build_pile_3[i].includes("~MC~")) {
+                                    build_pile_3[i] = "MC";
                                 }
                                 draw_pile.push(build_pile_3[i])
                             }
@@ -789,13 +825,17 @@ server.on('connection', function(socket) {
                         card = getTopCard(build_pile_4);
                         if (card != undefined && card != null) card = card.replace(/~SB~/g, "");
                         if (card != undefined && card != null) card = card.replace(/~RC~/g, "");
+                        if (card != undefined && card != null) card = card.replace(/~MC~/g, "");
                         if (card === topCard) {
-                            for (let i=0;i<build_pile_4.length;i++) {
+                            for (let i = 0; i < build_pile_4.length; i++) {
                                 if (build_pile_4[i].includes("~SB~")) {
                                     build_pile_4[i] = "SB";
                                 }
                                 if (build_pile_4[i].includes("~RC~")) {
                                     build_pile_4[i] = "RC";
+                                }
+                                if (build_pile_4[i].includes("~MC~")) {
+                                    build_pile_4[i] = "MC";
                                 }
                                 draw_pile.push(build_pile_4[i])
                             }
@@ -806,8 +846,7 @@ server.on('connection', function(socket) {
                         socket.send(JSON.stringify({
                             return_type: null,
                             clientkey: object.clientKey,
-                            run: [
-                                {
+                            run: [{
                                     name: "Hand1Card",
                                     type: "SET",
                                     value: playerData[object.clientKey].hand[0]
@@ -862,8 +901,7 @@ server.on('connection', function(socket) {
                         keys.forEach(s => {
                             authData[s].socket.send(JSON.stringify({
                                 return_type: null,
-                                run: [
-                                    {
+                                run: [{
                                         name: "Build1Card",
                                         type: "SET",
                                         value: getTopCard(build_pile_1)
@@ -893,7 +931,7 @@ server.on('connection', function(socket) {
             }
         }
     });
-  
+
     // When a socket closes, or disconnects, remove it from the array and all other data related to it.
     socket.on('close', function() {
         sockets = sockets.filter(s => s !== socket);
@@ -928,7 +966,8 @@ function createPlayerData(name, host) {
  * @returns {array} array
  */
 function shuffle(array) {
-    var currentIndex = array.length, temporaryValue, randomIndex;
+    var currentIndex = array.length,
+        temporaryValue, randomIndex;
 
     // While there remain elements to shuffle...
     while (0 != currentIndex) {
@@ -979,7 +1018,7 @@ function popCard(deck) {
  */
 function getTopCard(deck) {
     if (deck.length >= 1) {
-        let card = deck[deck.length-1];
+        let card = deck[deck.length - 1];
         return card;
     }
     return null;
@@ -994,7 +1033,7 @@ function getTopCard(deck) {
  */
 function popMultCard(deck, amount) {
     if (deck.length >= amount) {
-        let card = deck.splice(deck.length-amount-1, amount);
+        let card = deck.splice(deck.length - amount - 1, amount);
         return card;
     } else {
         return null;
@@ -1101,11 +1140,13 @@ function setHandCard(name, socket, value) {
  */
 function CheckCardPlacement(deck, card) {
     let top_card = getTopCard(deck);
-    if (card != undefined && card != null && card.includes("~RC~")) return true;
+    if (card != undefined && card != null && (card.includes("~RC~") || card.includes("~MC~"))) return true;
     if (top_card != undefined && top_card != null) top_card = top_card.replace(/~SB~/g, "");
     if (card != undefined && card != null) card = card.replace(/~SB~/g, "");
     if (top_card != undefined && top_card != null) top_card = top_card.replace(/~RC~/g, "");
     if (card != undefined && card != null) card = card.replace(/~RC~/g, "");
+    if (top_card != undefined && top_card != null) top_card = top_card.replace(/~MC~/g, "");
+    if (card != undefined && card != null) card = card.replace(/~MC~/g, "");
     if (top_card == null || top_card == undefined || top_card == Number.NaN) top_card = "0";
     top_card = parseInt(top_card);
     card = parseInt(card);
@@ -1126,13 +1167,11 @@ function FixDrawPile() {
             authData[s].socket.send(JSON.stringify({
                 return_type: null,
                 clientKey: null,
-                run: [
-                    {
-                        name: "DrawPileEmpty",
-                        type: "MESSAGE",
-                        info: "The Draw Pile is empty! Emptying Discard Piles!"
-                    }
-                ]
+                run: [{
+                    name: "DrawPileEmpty",
+                    type: "MESSAGE",
+                    info: "The Draw Pile is empty! Emptying Discard Piles!"
+                }]
             }));
 
             playerData[s].discard_pile_1.forEach(c => {
@@ -1141,6 +1180,9 @@ function FixDrawPile() {
                 }
                 if (c.includes("~RC~")) {
                     c = "RC";
+                }
+                if (c.includes("~MC~")) {
+                    c = "MC";
                 }
                 draw_pile.push(c)
             });
@@ -1151,6 +1193,9 @@ function FixDrawPile() {
                 if (c.includes("~RC~")) {
                     c = "RC";
                 }
+                if (c.includes("~MC~")) {
+                    c = "MC";
+                }
                 draw_pile.push(c)
             });
             playerData[s].discard_pile_3.forEach(c => {
@@ -1160,6 +1205,9 @@ function FixDrawPile() {
                 if (c.includes("~RC~")) {
                     c = "RC";
                 }
+                if (c.includes("~MC~")) {
+                    c = "MC";
+                }
                 draw_pile.push(c)
             });
             playerData[s].discard_pile_4.forEach(c => {
@@ -1168,6 +1216,9 @@ function FixDrawPile() {
                 }
                 if (c.includes("~RC~")) {
                     c = "RC";
+                }
+                if (c.includes("~MC~")) {
+                    c = "MC";
                 }
                 draw_pile.push(c)
             });
@@ -1182,8 +1233,7 @@ function FixDrawPile() {
             keys.forEach(s => {
                 authData[s].socket.send(JSON.stringify({
                     return_type: s,
-                    run: [
-                        {
+                    run: [{
                             name: "Discard1Card",
                             type: "SET",
                             value: getTopCard("discard_pile_1", s)
@@ -1222,23 +1272,57 @@ function countCards() {
     count = count + build_pile_2.length;
     count = count + build_pile_3.length;
     count = count + build_pile_4.length;
-    for (let i=0; i<keys.length; i++) {
+    for (let i = 0; i < keys.length; i++) {
         count = count + playerData[keys[i]].discard_pile_1.length;
         count = count + playerData[keys[i]].discard_pile_2.length;
         count = count + playerData[keys[i]].discard_pile_3.length;
         count = count + playerData[keys[i]].discard_pile_4.length;
         count = count + playerData[keys[i]].stock_pile.length;
-        for (let j=0; j<5;j++) {
+        for (let j = 0; j < 5; j++) {
             if (playerData[keys[i]].hand[j] != null && playerData[keys[i]].hand[j] != undefined) {
                 count++;
             }
         }
     }
     console.log("Card Amount: " + count);
-    if (count != 162 && count != 180 && count != 324 && count != 342) console.log("CARD ERROR");
+    if (count != 162 && count != 164 && count != 180 && count != 182 && count != 324 && count != 326 && count != 342 && count != 344) console.log("CARD ERROR");
     console.log(draw_pile);
     console.log(build_pile_1);
     console.log(build_pile_2);
     console.log(build_pile_3);
     console.log(build_pile_4);
 }
+
+/**
+ * START OF COMMAND INJECTOR CODE!
+ */
+
+
+console.log("STARTING COMMAND INJECTOR...")
+
+rl.on('line', (input) => {
+    if (input.includes("~ADD~")) {
+        let card = input.replace(/~ADD~( )?/g, "");
+        console.log(`Adding card "${card}" to top of draw pile!`);
+        pushCard(draw_pile, card);
+    }
+    if (input.includes("~SUFFLE~")) {
+        console.log("Suffling draw pile!");
+        shuffle(draw_pile);
+    }
+});
+
+rl.on('SIGINT', () => {
+    rl.question('[31mAre you sure you want to exit the command injector and kill the server? (y or n) [0m', (answer) => {
+        if (answer.match(/^y(es)?$/i)) {
+            rl.pause();
+            console.log("[31mCommand injector stopped![0m");
+            console.log("[31mKilling server![0m");
+            process.exit(0);
+        }
+    });
+});
+
+rl.on('SIGTSTP', () => {
+    console.log("[33mThis program may not be moved to the background while the command injector is running![0m");
+});
