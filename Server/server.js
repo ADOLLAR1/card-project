@@ -4,7 +4,6 @@ const server = new WebSocket.Server({
 });
 
 const readline = require('readline');
-const { Console } = require('console');
 
 const rl = readline.createInterface({
     input: process.stdin,
