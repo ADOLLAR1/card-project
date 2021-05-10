@@ -4,6 +4,7 @@ const server = new WebSocket.Server({
 });
 
 const readline = require('readline');
+const { Console } = require('console');
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -1309,15 +1310,100 @@ rl.on('line', (input) => {
         let card = input.replace(/~ADD~( )?/g, "");
         console.log(`Adding card "${card}" to top of draw pile!`);
         pushCard(draw_pile, card);
+        return;
     }
     if (input.includes("~SUFFLE~")) {
         console.log("Suffling draw pile!");
         shuffle(draw_pile);
+        return;
+    }
+    if (input.includes("~INFO~")) {
+        console.log("DRAW PILE:");
+        console.log(draw_pile);
+        console.log("BUILD PILE 1:");
+        console.log(build_pile_1);
+        console.log("BUILD PILE 2:");
+        console.log(build_pile_2);
+        console.log("BUILD PILE 3:");
+        console.log(build_pile_3);
+        console.log("BUILD PILE 4:");
+        console.log(build_pile_4);
+        console.log(`TURN INDEX: ${turn_index}`);
+        console.log("AUTH DATA:");
+        console.log(authData);
+        console.log("PLAYER DATA:");
+        console.log(playerData);
+        return;
+    }
+    if (input.includes("~COUNT~")) {
+        console.log("Counting cards!");
+        countCards();
+        return;
+    }
+    if (input.includes("~EXIT~")) {
+        rl.question('[31mAre you sure you want to exit the command injector and kill the server? (y or n)[0m: ', (answer) => {
+            if (answer.match(/^y(es)?$/i)) {
+                rl.pause();
+                console.log("[31mCommand injector stopped![0m");
+                console.log("[31mKilling server![0m");
+                process.exit(0);
+            }
+        });
+        return;
+    }
+    if (input.includes("~RETURN~")) {
+        console.log("Returning discard cards");
+        FixDrawPile();
+        return;
+    }
+    if (input.includes("~HARDADD~")) {
+        let data = input.replace(/~HARDADD~( )?/g, "");
+        console.log(data);
+        let info = data.split(" ");
+        let deck = translateDeckName(info[1], info[0]);
+        if (typeof(deck) === 'object') {
+            pushCard(deck, info[2]);
+        } else {
+            setHandCard(info[1], info[0], info[2]);
+        }
+        console.log("Added!");
+        return;
+
+    }
+    if (input.includes("~GETKEY~")) {
+        let name = input.replace(/~GETKEY~( )?/g, "");
+        let keys = Object.keys(playerData);
+
+        keys.forEach(key => {
+            let data = playerData[key];
+            if (name === data["name"]) {
+                console.log(`Key: ${key}`);
+                return;
+            }
+        });
+        console.log("Player not found!");
+        return;
+    }
+    if (input.includes("~SEND~")) {
+        let data = input.replace(/~SEND~( )?/g, "");
+        let info = data.split(" ");
+        let str = "SYSTEM MESSAGE:";
+        for (let i = 1; i < info.length; i++) {
+            str += ` ${info[i]}`;
+        }
+        authData[info[0]].socket.send(JSON.stringify({
+            return_type: null,
+            run: [{
+                name: "systemMessage",
+                type: "MESSAGE",
+                info: str
+            }]
+        }));
     }
 });
 
 rl.on('SIGINT', () => {
-    rl.question('[31mAre you sure you want to exit the command injector and kill the server? (y or n) [0m', (answer) => {
+    rl.question('[31mAre you sure you want to exit the command injector and kill the server? (y or n)[0m: ', (answer) => {
         if (answer.match(/^y(es)?$/i)) {
             rl.pause();
             console.log("[31mCommand injector stopped![0m");
@@ -1330,5 +1416,7 @@ rl.on('SIGINT', () => {
 rl.on('SIGTSTP', () => {
     console.log("[33mThis program may not be moved to the background while the command injector is running![0m");
 });
+
+
 
 console.log("COMMAND INJECTOR STARTED!");

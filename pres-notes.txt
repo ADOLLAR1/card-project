@@ -5,7 +5,7 @@ First 5 Min
 Talk about the project and why I made it
     Why did I want to make it
     Why did I not just find one already made
-    Why did I code it (and in what language) they way I did
+    Why did I code it (and in what language) the way I did
 
 Second 5 Min
 
