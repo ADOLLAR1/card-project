@@ -518,7 +518,7 @@ function infoPrompt(info) {
     while (value == null || value == undefined) {
         value = prompt(info);
     }
-    return value
+    return value;
 }
 
 
