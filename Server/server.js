@@ -3,12 +3,57 @@ const server = new WebSocket.Server({
     port: 15000
 });
 
-const readline = require('readline');
+const tui = require("blessed");
 
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
+const screen = tui.screen({
+    smartCSR: true,
+    dockBorders: true
 });
+
+const form = tui.form({
+    top: "0",
+    left: "0",
+    width: "100%",
+    height: "100%"
+});
+
+const list = tui.box({
+    top: "0",
+    left: "80%",
+    width: "20%",
+    height: "100%-3",
+    border: {
+        "type": "line"
+    }
+});
+
+const log = tui.box({
+    top: "0",
+    left: "0",
+    width: "80%-1",
+    height: "100%-3",
+    scrollbar: true,
+    scrollable: true,
+    alwaysScroll: true,
+    border: {
+        type: "line"
+    }
+});
+
+const input = tui.textbox({
+    top: "100%-3",
+    left: "0",
+    width: "100%",
+    height: "0%+3",
+    border: {
+        type: "line"
+    }
+})
+
+form.append(list);
+form.append(log);
+form.append(input);
+screen.append(form);
 
 const cards = ["1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1",
     "2", "2", "2", "2", "2", "2", "2", "2", "2", "2", "2", "2",
@@ -175,17 +220,17 @@ let authData = {};
     Server Handling
 */
 
-console.log("STARTING SREVER...");
+addLog("STARTING SREVER...");
 
 server.on('timeout', function(timedOutSocket) {
-    console.log("TIME OUT");
+    addLog("TIME OUT");
     timedOutSocket.write('socket timed out!');
     timedOutSocket.end();
 });
 
 server.on('connection', function(socket) {
     sockets.push(socket);
-    console.log("Connection recived!");
+    addLog("Connection recived!");
 
 
     socket.send(JSON.stringify(CheckJSON));
@@ -202,7 +247,7 @@ server.on('connection', function(socket) {
         }
 
         if (object.type === "LOGIN") { //Login
-            console.log(`Recived login message from: ${object.clientKey}`);
+            addLog(`Recived login message from: ${object.clientKey}`);
             authData[object.clientKey] = { socket: socket };
             if (object.return.password === password) {
                 authData[object.clientKey].Auth = true;
@@ -219,7 +264,7 @@ server.on('connection', function(socket) {
         }
 
         if (object.type === "NAME") { //Set Name
-            console.log(`Recived name message from: ${object.clientKey}`);
+            addLog(`Recived name message from: ${object.clientKey}`);
             if (authData[object.clientKey].Auth) {
                 let found = false;
                 keys.forEach(s => {
@@ -268,7 +313,7 @@ server.on('connection', function(socket) {
         }
 
         if (object.type === "START") {
-            console.log(`Recived start message from: ${object.clientKey}`);
+            addLog(`Recived start message from: ${object.clientKey}`);
             if (authData[object.clientKey].Host) {
                 if (sockets.length >= 2) {
                     if (sockets.length <= 6) {
@@ -437,10 +482,10 @@ server.on('connection', function(socket) {
         }
 
         if (object.type === "PLACE") {
-            console.log(`Recived place message from: ${object.clientKey}`);
+            addLog(`Recived place message from: ${object.clientKey}`);
 
             if (draw_pile.length <= 0) {
-                console.log("Draw Pile Empty");
+                addLog("Draw Pile Empty");
                 keys.forEach(s => {
                     authData[s].socket.send(JSON.stringify({
                         return_type: null,
@@ -547,20 +592,20 @@ server.on('connection', function(socket) {
                         if (push === "Discard1Card" || push === "Discard2Card" || push === "Discard3Card" || push === "Discard4Card") {
                             if (translateDeckName(pop, object.clientKey) == null || translateDeckName(pop, object.clientKey) == undefined) return;
                             pushCard(translateDeckName(push, object.clientKey), popHandCard(pop, object.clientKey));
-                            if (getTopCard(translateDeckName(push, object.clientKey)) == undefined) console.log("ERROR IN PUSH");
+                            if (getTopCard(translateDeckName(push, object.clientKey)) == undefined) addLog("ERROR IN PUSH");
                             turn_index++;
                             if (turn_index == keys.length) turn_index = 0;
                             for (let i = 0; i < 5; i++) {
                                 if (playerData[keys[turn_index]].hand[i] == null || playerData[keys[turn_index]].hand[i] == undefined) {
                                     playerData[keys[turn_index]].hand[i] = popCard(draw_pile);
                                     while (typeof(playerData[keys[turn_index]].hand[i]) !== "string") {
-                                        console.log("FIXING ERROR CARD! Client Key: " + [keys[turn_index]]);
-                                        console.log("Old Value: " + playerData[keys[turn_index]].hand[i]);
+                                        addLog("FIXING ERROR CARD! Client Key: " + [keys[turn_index]]);
+                                        addLog("Old Value: " + playerData[keys[turn_index]].hand[i]);
                                         playerData[keys[turn_index]].hand[i] = popCard(draw_pile);
-                                        console.log("New Value: " + playerData[keys[turn_index]].hand[i]);
+                                        addLog("New Value: " + playerData[keys[turn_index]].hand[i]);
                                         if (draw_pile.length <= 0) {
                                             playerData[keys[turn_index]].hand[i] = undefined;
-                                            console.log("DRAW PILE EMPTY");
+                                            addLog("DRAW PILE EMPTY");
                                             break;
                                         }
 
@@ -722,7 +767,7 @@ server.on('connection', function(socket) {
                                 if (count >= 5) {
 
                                     if (draw_pile.length <= 4) {
-                                        console.log("DRAW PILE EMPTY");
+                                        addLog("DRAW PILE EMPTY");
                                         FixDrawPile();
                                     }
 
@@ -937,7 +982,7 @@ server.on('connection', function(socket) {
     });
 });
 
-console.log("SERVER STARTED!");
+addLog("SERVER STARTED!");
 
 
 
@@ -1163,7 +1208,7 @@ function CheckCardPlacement(deck, card) {
  */
 function FixDrawPile() {
     if (true) {
-        console.log("Draw Pile Empty");
+        addLog("Draw Pile Empty");
         keys.forEach(s => {
             authData[s].socket.send(JSON.stringify({
                 return_type: null,
@@ -1285,85 +1330,87 @@ function countCards() {
             }
         }
     }
-    console.log("Card Amount: " + count);
-    if (count != 162 && count != 164 && count != 180 && count != 182 && count != 324 && count != 326 && count != 342 && count != 344) console.log("CARD ERROR");
-    console.log(draw_pile);
-    console.log(build_pile_1);
-    console.log(build_pile_2);
-    console.log(build_pile_3);
-    console.log(build_pile_4);
+    addLog("Card Amount: " + count);
+    if (count != 162 && count != 164 && count != 180 && count != 182 && count != 324 && count != 326 && count != 342 && count != 344) addLog("CARD ERROR");
+    addLog(draw_pile);
+    addLog(build_pile_1);
+    addLog(build_pile_2);
+    addLog(build_pile_3);
+    addLog(build_pile_4);
 }
 
 /**
  * START OF COMMAND INJECTOR CODE!
  */
 
+/**
+ * 
+ * @param {*} logLine 
+ */
+function addLog(logLine) {
+    if (typeof(logLine) === "string") {
+        log.setContent(`${logLine}\n${log.getContent()}`);
+    } else if (typeof(logLine) === "object") {
+        log.setContent(`${JSON.stringify(logLine)}\n${log.getContent()}`);
+    } else {
+        log.setContent(`${toString(logLine)}\n${log.getContent()}`);
+    }
+    screen.render();
+}
 
-console.log("STARTING COMMAND INJECTOR...")
+addLog("STARTING COMMAND INJECTOR...");
 
-rl.on('line', (input) => {
-    if (input.includes("~ADD~")) {
-        let card = input.replace(/~ADD~( )?/g, "");
-        console.log(`Adding card "${card}" to top of draw pile!`);
+input.readInput();
+
+input.on('submit', () => {
+    let text = input.getText();
+
+    if (text.includes("~ADD~")) {
+        let card = text.replace(/~ADD~( )?/g, "");
+        addLog(`Adding card "${card}" to top of draw pile!`);
         pushCard(draw_pile, card);
-        return;
     }
-    if (input.includes("~SUFFLE~")) {
-        console.log("Suffling draw pile!");
+    if (text.includes("~SUFFLE~")) {
+        addLog("Suffling draw pile!");
         shuffle(draw_pile);
-        return;
     }
-    if (input.includes("~INFO~")) {
-        console.log("DRAW PILE:");
-        console.log(draw_pile);
-        console.log("BUILD PILE 1:");
-        console.log(build_pile_1);
-        console.log("BUILD PILE 2:");
-        console.log(build_pile_2);
-        console.log("BUILD PILE 3:");
-        console.log(build_pile_3);
-        console.log("BUILD PILE 4:");
-        console.log(build_pile_4);
-        console.log(`TURN INDEX: ${turn_index}`);
-        console.log("AUTH DATA:");
-        console.log(authData);
-        console.log("PLAYER DATA:");
-        console.log(playerData);
-        return;
+    if (text.includes("~INFO~")) {
+        addLog("DRAW PILE:");
+        addLog(draw_pile);
+        addLog("BUILD PILE 1:");
+        addLog(build_pile_1);
+        addLog("BUILD PILE 2:");
+        addLog(build_pile_2);
+        addLog("BUILD PILE 3:");
+        addLog(build_pile_3);
+        addLog("BUILD PILE 4:");
+        addLog(build_pile_4);
+        addLog(`TURN INDEX: ${turn_index}`);
+        addLog("AUTH DATA:");
+        addLog(authData);
+        addLog("PLAYER DATA:");
+        addLog(playerData);
     }
-    if (input.includes("~COUNT~")) {
-        console.log("Counting cards!");
+    if (text.includes("~COUNT~")) {
+        addLog("Counting cards!");
         countCards();
-        return;
     }
-    if (input.includes("~EXIT~")) {
-        rl.question('[31mAre you sure you want to exit the command injector and the server? (y or n)[0m: ', (answer) => {
-            if (answer.match(/^y(es)?$/i)) {
-                rl.pause();
-                console.log("[31mCommand injector stopped![0m");
-                console.log("[31mKilling server![0m");
-                process.exit(0);
-            }
-        });
-        return;
+    if (text.includes("~EXIT~")) {
+        addLog("[31mCommand injector stopped![0m");
+        addLog("[31mStopping server![0m");
+        process.exit(0);
     }
-    if (input.includes("~KILL~")) {
-        rl.question('[31mAre you sure you want to kill the server? (THIS SHOULD [1m[4mNOT[0m[31m BE USED TO STOP THE SERVER!!!) (y or n)[0m: ', (answer) => {
-            if (answer.match(/^y(es)?$/i)) {
-                console.log("[31mKilling server![0m");
-                process.kill(process.pid, 'SIGKILL');
-            }
-        });
-        return;
+    if (text.includes("~KILL~")) {
+        addLog("[31mKilling server![0m");
+        process.kill(process.pid, 'SIGKILL');
     }
-    if (input.includes("~RETURN~")) {
-        console.log("Returning discard cards");
+    if (text.includes("~RETURN~")) {
+        addLog("Returning discard cards");
         FixDrawPile();
-        return;
     }
-    if (input.includes("~HARDADD~")) {
-        let data = input.replace(/~HARDADD~( )?/g, "");
-        console.log(data);
+    if (text.includes("~HARDADD~")) {
+        let data = text.replace(/~HARDADD~( )?/g, "");
+        addLog(data);
         let info = data.split(" ");
         let deck = translateDeckName(info[1], info[0]);
         if (typeof(deck) === 'object') {
@@ -1371,26 +1418,22 @@ rl.on('line', (input) => {
         } else {
             setHandCard(info[1], info[0], info[2]);
         }
-        console.log("Added!");
-        return;
+        addLog("Added!");
 
     }
-    if (input.includes("~GETKEY~")) {
-        let name = input.replace(/~GETKEY~( )?/g, "");
+    if (text.includes("~GETKEY~")) {
+        let name = text.replace(/~GETKEY~( )?/g, "");
         let keys = Object.keys(playerData);
 
         keys.forEach(key => {
             let data = playerData[key];
             if (name === data["name"]) {
-                console.log(`Key: ${key}`);
-                return;
+                addLog(`Key: ${key}`);
             }
         });
-        console.log("Player not found!");
-        return;
     }
-    if (input.includes("~SEND~")) {
-        let data = input.replace(/~SEND~( )?/g, "");
+    if (text.includes("~SEND~")) {
+        let data = text.replace(/~SEND~( )?/g, "");
         let info = data.split(" ");
         let str = "SYSTEM MESSAGE:";
         for (let i = 1; i < info.length; i++) {
@@ -1405,23 +1448,12 @@ rl.on('line', (input) => {
             }]
         }));
     }
+    input.clearValue();
+    input.readInput();
+    screen.render();
 });
 
-rl.on('SIGINT', () => {
-    rl.question('[31mAre you sure you want to exit the command injector and the server? (y or n)[0m: ', (answer) => {
-        if (answer.match(/^y(es)?$/i)) {
-            rl.pause();
-            console.log("[31mCommand injector stopped![0m");
-            console.log("[31mKilling server![0m");
-            process.exit(0);
-        }
-    });
-});
-
-rl.on('SIGTSTP', () => {
-    console.log("[33mThis program may not be moved to the background while the command injector is running![0m");
-});
+screen.render();
 
 
-
-console.log("COMMAND INJECTOR STARTED!");
+addLog("COMMAND INJECTOR STARTED!");
