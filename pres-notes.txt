@@ -1,21 +1,19 @@
-15min Total
+10min Total
 
 First 5 Min
+Talk about job skills I learned
+I.  HTML
+II. CSS
+III.JS
+IV. P5
+V.  NODE
+VI. JSON
+VII.WEBSOCKETS
 
-Talk about the project and why I made it
-    Why did I want to make it
-    Why did I not just find one already made
-    Why did I code it (and in what language) the way I did
-
-Second 5 Min
-
-Talk about what I had to learn
-    First time using web sockets
-    First time reading external JSON Files (From Client)
-
-Last 5min
-
-Talk about what I would do differently / what did I learn
-    I would use oop code
-    Use more/better libraries
-    Would I make it again?
+Last 5 Min
+Talk about framework skills
+I.  Self motivation (Why did I want to make it)
+II. Integrity (I did not make the game unfair for others)
+III.Plan. Org. Man. (I knew my end goal, and I had a list of steps to get there) (I sadly lost the list)
+IV. Work Ethic (I tired to make the game the best I could, while also learning new things a;long the way)
+V.  Professional development (If I did not know how to so something I researched and learnt it)
