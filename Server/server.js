@@ -56,7 +56,7 @@ let turn_index = 0;
 let topCard = "12";
 
 const password = "LetUsPlay";
-const hostpassword = "GimmieHost"
+const hostpassword = "GimmieHost";
 
 /*
     JSON Messages
@@ -202,7 +202,7 @@ server.on('connection', function(socket) {
         }
 
         if (object.type === "LOGIN") { //Login
-            console.log("Recived Login message!");
+            console.log(`Recived login message from: ${object.clientKey}`);
             authData[object.clientKey] = { socket: socket };
             if (object.return.password === password) {
                 authData[object.clientKey].Auth = true;
@@ -219,7 +219,7 @@ server.on('connection', function(socket) {
         }
 
         if (object.type === "NAME") { //Set Name
-            console.log("Recived Name Message!")
+            console.log(`Recived name message from: ${object.clientKey}`);
             if (authData[object.clientKey].Auth) {
                 let found = false;
                 keys.forEach(s => {
@@ -268,7 +268,7 @@ server.on('connection', function(socket) {
         }
 
         if (object.type === "START") {
-            console.log("Recived Start Message!");
+            console.log(`Recived start message from: ${object.clientKey}`);
             if (authData[object.clientKey].Host) {
                 if (sockets.length >= 2) {
                     if (sockets.length <= 6) {
@@ -437,7 +437,7 @@ server.on('connection', function(socket) {
         }
 
         if (object.type === "PLACE") {
-            console.log("Recived Place Message!");
+            console.log(`Recived place message from: ${object.clientKey}`);
 
             if (draw_pile.length <= 0) {
                 console.log("Draw Pile Empty");
@@ -558,8 +558,6 @@ server.on('connection', function(socket) {
                                         console.log("Old Value: " + playerData[keys[turn_index]].hand[i]);
                                         playerData[keys[turn_index]].hand[i] = popCard(draw_pile);
                                         console.log("New Value: " + playerData[keys[turn_index]].hand[i]);
-                                        countCards();
-
                                         if (draw_pile.length <= 0) {
                                             playerData[keys[turn_index]].hand[i] = undefined;
                                             console.log("DRAW PILE EMPTY");
@@ -615,7 +613,6 @@ server.on('connection', function(socket) {
                                     }]
                                 }));
                             });
-                            countCards();
                         } else if (pop === "StockCard" || pop === "Discard1Card" || pop === "Discard2Card" || pop === "Discard3Card" || pop === "Discard4Card") {
                             if (getTopCard(translateDeckName(pop, object.clientKey)) == null || getTopCard(translateDeckName(pop, object.clientKey)) == undefined) return;
                             if (getTopCard(translateDeckName(pop, object.clientKey)) === "SB") {
@@ -1340,12 +1337,21 @@ rl.on('line', (input) => {
         return;
     }
     if (input.includes("~EXIT~")) {
-        rl.question('[31mAre you sure you want to exit the command injector and kill the server? (y or n)[0m: ', (answer) => {
+        rl.question('[31mAre you sure you want to exit the command injector and the server? (y or n)[0m: ', (answer) => {
             if (answer.match(/^y(es)?$/i)) {
                 rl.pause();
                 console.log("[31mCommand injector stopped![0m");
                 console.log("[31mKilling server![0m");
                 process.exit(0);
+            }
+        });
+        return;
+    }
+    if (input.includes("~KILL~")) {
+        rl.question('[31mAre you sure you want to kill the server? (THIS SHOULD [1m[4mNOT[0m[31m BE USED TO STOP THE SERVER!!!) (y or n)[0m: ', (answer) => {
+            if (answer.match(/^y(es)?$/i)) {
+                console.log("[31mKilling server![0m");
+                process.kill(process.pid, 'SIGKILL');
             }
         });
         return;
@@ -1402,7 +1408,7 @@ rl.on('line', (input) => {
 });
 
 rl.on('SIGINT', () => {
-    rl.question('[31mAre you sure you want to exit the command injector and kill the server? (y or n)[0m: ', (answer) => {
+    rl.question('[31mAre you sure you want to exit the command injector and the server? (y or n)[0m: ', (answer) => {
         if (answer.match(/^y(es)?$/i)) {
             rl.pause();
             console.log("[31mCommand injector stopped![0m");
