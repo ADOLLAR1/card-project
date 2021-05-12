@@ -14,7 +14,8 @@ const form = tui.form({
     top: "0",
     left: "0",
     width: "100%",
-    height: "100%"
+    height: "100%",
+    tags: true
 });
 
 const list = tui.box({
@@ -22,6 +23,8 @@ const list = tui.box({
     left: "80%",
     width: "20%",
     height: "100%-3",
+    content: "{center}Players:{/center}",
+    tags: true,
     border: {
         "type": "line"
     }
@@ -35,6 +38,7 @@ const log = tui.box({
     scrollbar: true,
     scrollable: true,
     alwaysScroll: true,
+    tags: true,
     border: {
         type: "line"
     }
@@ -276,6 +280,11 @@ server.on('connection', function(socket) {
                     socket.send(JSON.stringify(NameTakenJSON));
                 } else {
                     playerData[object.clientKey] = createPlayerData(object.return.name, authData[object.clientKey].Host);
+                    if (authData[object.clientKey].Host) {
+                        addPlayerToTui(`{bold}${object.return.name}{/bold}`);
+                    } else {
+                        addPlayerToTui(object.return.name);
+                    }
                     socket.send(JSON.stringify({
                         return_type: null,
                         clientKey: object.clientKey,
@@ -1358,6 +1367,15 @@ function addLog(logLine) {
     screen.render();
 }
 
+/**
+ * 
+ * @param {String} name 
+ */
+function addPlayerToTui(name) {
+    list.setContent(`${list.getContent()}\n${name}`);
+    screen.render();
+}
+
 addLog("STARTING COMMAND INJECTOR...");
 
 input.readInput();
@@ -1395,7 +1413,7 @@ input.on('submit', () => {
         addLog("Counting cards!");
         countCards();
     }
-    if (text.includes("~EXIT~")) {
+    if (text.includes("~EXIT~") || text.includes("^C")) {
         addLog("[31mCommand injector stopped![0m");
         addLog("[31mStopping server![0m");
         process.exit(0);
