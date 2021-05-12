@@ -2,10 +2,12 @@ body {
     padding: 0;
     margin: 0;
 }
+
 main {
     float: left;
     display: block;
 }
+
 aside {
     position: absolute;
     top: 0;
@@ -52,4 +54,9 @@ aside {
 @font-face {
     font-family: Easter-theme;
     src: url(Assets/Easter/font.ttf);
+}
+
+@font-face {
+    font-family: Summer-theme;
+    src: url(Assets/Summer/font.ttf);
 }

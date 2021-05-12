@@ -63,9 +63,9 @@ function preload() {
         WSURL = "ws://127.0.0.1:15000";
     }
 
-    theme = prompt("Please enter a theme name: (Valid theme names are: 'Default' 'Thanksgiving' 'Winter' 'Christmas' 'Computer' 'Alternate' 'Easter')");
+    theme = prompt("Please enter a theme name: (Valid theme names are: 'Default' 'Thanksgiving' 'Winter' 'Christmas' 'Computer' 'Alternate' 'Easter' 'Summer')");
     while (theme == null || theme == undefined || theme === "") {
-        theme = prompt("Please enter a theme name: (Valid theme names are: 'Default' 'Thanksgiving' 'Winter' 'Christmas' 'Computer' 'Alternate' 'Easter')");
+        theme = prompt("Please enter a theme name: (Valid theme names are: 'Default' 'Thanksgiving' 'Winter' 'Christmas' 'Computer' 'Alternate' 'Easter' 'Summer')");
     }
     path = path + theme + "/";
     card = loadImage(path + "card.png");
@@ -81,6 +81,7 @@ function preload() {
  */
 function setup() {
     angleMode(DEGREES);
+    origSunMap.loadPixels();
     key = prompt("Do you have a client key? (Only use if you got disconnected)");
     if (key === "" || key == undefined || key == null) {
         key = makeid(127);
@@ -159,6 +160,8 @@ function draw() {
         magicEffectDraw();
     } else if (themedata["EFFECT"] === "snow") {
         snowEffectDraw();
+    } else if (themedata["EFFECT"] == "summer") {
+        summerEffectDraw();
     }
 
     textFont(font);
@@ -716,6 +719,8 @@ function clamp(x, a, b) {
 
 let magicMap;
 let snowMap;
+let sunMap;
+let origSunMap;
 
 
 /**
@@ -724,6 +729,8 @@ let snowMap;
 function effectPreinit() {
     magicMap = loadImage("Assets/EFFECTS/magic/map.png");
     snowMap = loadImage("Assets/EFFECTS/snow/map.png");
+    sunMap = loadImage("Assets/EFFECTS/summer/map.png");
+    origSunMap = loadImage("Assets/EFFECTS/summer/map.png");
 }
 
 
@@ -743,4 +750,27 @@ function snowEffectDraw() {
     let tmp = frameCount % (800 / scaleFactor);
     tmp = (800 / scaleFactor) - tmp
     image(snowMap, 0, 0, 800 / scaleFactor, 800 / scaleFactor, tmp + 800, tmp + 800, 800 / scaleFactor, 800 / scaleFactor);
+}
+
+/**
+ * Function to sraw summer effect
+ */
+function summerEffectDraw() {
+    push();
+    angleMode(DEGREES);
+    rotate(45);
+    sunMap.loadPixels();
+    let rng = Math.floor(noise(frameCount / 0.01) * 10) - 5;
+    for (let x = 0; x < 1024; x++) {
+        for (let y = 0; y < 1024; y++) {
+            let index = (x + y * 1024) * 4;
+            sunMap.pixels[index] = origSunMap.pixels[index];
+            sunMap.pixels[index + 1] = origSunMap.pixels[index + 1];
+            sunMap.pixels[index + 2] = origSunMap.pixels[index + 2];
+            sunMap.pixels[index + 3] = origSunMap.pixels[index + 3] + rng;
+        }
+    }
+    sunMap.updatePixels();
+    image(sunMap, 0, -1024, 2048 / scaleFactor, 2048 / scaleFactor);
+    pop();
 }
