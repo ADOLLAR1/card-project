@@ -107,6 +107,9 @@ let topCard = "12";
 const password = "LetUsPlay";
 const hostpassword = "GimmieHost";
 
+let tracker = 1;
+let trackerEnabled = false;
+
 /*
     JSON Messages
 */
@@ -224,17 +227,17 @@ let authData = {};
     Server Handling
 */
 
-addLog("STARTING SREVER...");
+addLog("{yellow-fg}STARTING SREVER...{/yellow-fg}");
 
 server.on('timeout', function(timedOutSocket) {
-    addLog("TIME OUT");
+    addLog("{red-fg}TIME OUT{/red-fg}");
     timedOutSocket.write('socket timed out!');
     timedOutSocket.end();
 });
 
 server.on('connection', function(socket) {
     sockets.push(socket);
-    addLog("Connection recived!");
+    addLog("{green-fg}Connection recived!{/green-fg}");
 
 
     socket.send(JSON.stringify(CheckJSON));
@@ -491,10 +494,9 @@ server.on('connection', function(socket) {
         }
 
         if (object.type === "PLACE") {
-            addLog(`Recived place message from: ${object.clientKey}`);
 
             if (draw_pile.length <= 0) {
-                addLog("Draw Pile Empty");
+                addLog("{red-fg}Draw Pile Empty{/red-fg}");
                 keys.forEach(s => {
                     authData[s].socket.send(JSON.stringify({
                         return_type: null,
@@ -601,20 +603,20 @@ server.on('connection', function(socket) {
                         if (push === "Discard1Card" || push === "Discard2Card" || push === "Discard3Card" || push === "Discard4Card") {
                             if (translateDeckName(pop, object.clientKey) == null || translateDeckName(pop, object.clientKey) == undefined) return;
                             pushCard(translateDeckName(push, object.clientKey), popHandCard(pop, object.clientKey));
-                            if (getTopCard(translateDeckName(push, object.clientKey)) == undefined) addLog("ERROR IN PUSH");
+                            if (getTopCard(translateDeckName(push, object.clientKey)) == undefined) addLog("{red-fg}ERROR IN PUSH{/red-fg}");
                             turn_index++;
                             if (turn_index == keys.length) turn_index = 0;
                             for (let i = 0; i < 5; i++) {
                                 if (playerData[keys[turn_index]].hand[i] == null || playerData[keys[turn_index]].hand[i] == undefined) {
                                     playerData[keys[turn_index]].hand[i] = popCard(draw_pile);
                                     while (typeof(playerData[keys[turn_index]].hand[i]) !== "string") {
-                                        addLog("FIXING ERROR CARD! Client Key: " + [keys[turn_index]]);
+                                        addLog("{red-fg}FIXING ERROR CARD!{/red-fg} Client Key: " + [keys[turn_index]]);
                                         addLog("Old Value: " + playerData[keys[turn_index]].hand[i]);
                                         playerData[keys[turn_index]].hand[i] = popCard(draw_pile);
                                         addLog("New Value: " + playerData[keys[turn_index]].hand[i]);
                                         if (draw_pile.length <= 0) {
                                             playerData[keys[turn_index]].hand[i] = undefined;
-                                            addLog("DRAW PILE EMPTY");
+                                            addLog("{red-fg}DRAW PILE EMPTY{/red-fg}");
                                             break;
                                         }
 
@@ -776,7 +778,7 @@ server.on('connection', function(socket) {
                                 if (count >= 5) {
 
                                     if (draw_pile.length <= 4) {
-                                        addLog("DRAW PILE EMPTY");
+                                        addLog("{red-fg}DRAW PILE EMPTY{/red-fg}");
                                         FixDrawPile();
                                     }
 
@@ -991,7 +993,7 @@ server.on('connection', function(socket) {
     });
 });
 
-addLog("SERVER STARTED!");
+addLog("{green-fg}SERVER STARTED!{/green-fg}");
 
 
 
@@ -1217,7 +1219,7 @@ function CheckCardPlacement(deck, card) {
  */
 function FixDrawPile() {
     if (true) {
-        addLog("Draw Pile Empty");
+        addLog("{red-fg}Draw Pile Empty{/red-fg}");
         keys.forEach(s => {
             authData[s].socket.send(JSON.stringify({
                 return_type: null,
@@ -1340,7 +1342,7 @@ function countCards() {
         }
     }
     addLog("Card Amount: " + count);
-    if (count != 162 && count != 164 && count != 180 && count != 182 && count != 324 && count != 326 && count != 342 && count != 344) addLog("CARD ERROR");
+    if (count != 162 && count != 164 && count != 180 && count != 182 && count != 324 && count != 326 && count != 342 && count != 344) addLog("{red-fg}CARD ERROR{/red-fg}");
     addLog(draw_pile);
     addLog(build_pile_1);
     addLog(build_pile_2);
@@ -1364,7 +1366,16 @@ function addLog(logLine) {
     } else {
         log.setContent(`${toString(logLine)}\n${log.getContent()}`);
     }
-    screen.render();
+    if (trackerEnabled) {
+        if (tracker % 100 == 0) {
+            tracker = 1;
+            screen.render();
+        } else {
+            tracker++;
+        }
+    } else {
+        screen.render();
+    }
 }
 
 /**
@@ -1376,7 +1387,7 @@ function addPlayerToTui(name) {
     screen.render();
 }
 
-addLog("STARTING COMMAND INJECTOR...");
+addLog("{yellow-fg}STARTING COMMAND INJECTOR...{/yellow-fg}");
 
 input.readInput();
 
@@ -1466,6 +1477,11 @@ input.on('submit', () => {
             }]
         }));
     }
+    if (text.includes("~BUFFER~")) {
+        trackerEnabled = !trackerEnabled;
+        addLog(`Buffer: ${trackerEnabled}`);
+    }
+
     input.clearValue();
     input.readInput();
     screen.render();
@@ -1474,4 +1490,4 @@ input.on('submit', () => {
 screen.render();
 
 
-addLog("COMMAND INJECTOR STARTED!");
+addLog("{green-fg}COMMAND INJECTOR STARTED!{/green-fg}");
